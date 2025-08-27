@@ -1,0 +1,108 @@
+{% extends 'dashboard/layouts/base.html' %}
+{% load static %}
+
+{% block title %}Koreksi Ujian{% endblock %}
+{% block page_title %}Detail Koreksi Ujian{% endblock %}
+
+{% block content %}
+<div x-data="correctionHandler()">
+    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <h3 class="text-sm font-semibold text-gray-500">Nama Siswa</h3>
+                <p class="text-lg font-bold">{{ attempt.student.get_full_name }}</p>
+            </div>
+            <div>
+                <h3 class="text-sm font-semibold text-gray-500">Ujian</h3>
+                <p class="text-lg font-bold">{{ attempt.exam.name }}</p>
+            </div>
+            <div class="bg-blue-50 p-4 rounded-lg text-center">
+                <h3 class="text-sm font-semibold text-gray-500">Skor Awal (Otomatis dari PG)</h3>
+                <p class="text-2xl font-bold text-blue-600">{{ initial_score|floatformat:2 }} / 100</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="space-y-6">
+        {% for answer in answers %}
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <p class="font-semibold text-gray-800">{{ forloop.counter }}. {{ answer.question.question_text|safe }}</p>
+            <span class="text-xs text-gray-400">Bobot: {{ answer.question.weight }}</span>
+
+            {% if answer.question.question_type == 'PILIHAN_GANDA' %}
+            <div class="mt-4 border-l-4 {% if answer.is_correct %}border-green-500 bg-green-50{% else %}border-red-500 bg-red-50{% endif %} p-4 rounded-r-lg">
+                <p><span class="font-semibold">Jawaban Siswa:</span> {{ answer.selected_option }}</p>
+                <p><span class="font-semibold">Kunci Jawaban:</span> {{ answer.question.correct_answer }}</p>
+                <p class="mt-2 font-bold {% if answer.is_correct %}text-green-600{% else %}text-red-600{% endif %}">
+                    Status: {% if answer.is_correct %}Benar (Otomatis){% else %}Salah (Otomatis){% endif %}
+                </p>
+            </div>
+            {% else %}
+            <div class="mt-4">
+                <p class="font-semibold text-gray-700">Jawaban Siswa:</p>
+                <div class="bg-gray-50 border rounded-lg p-4 text-gray-800">{{ answer.answer_text|linebreaksbr }}</div>
+                
+                <div class="mt-4 p-4 border rounded-lg bg-indigo-50/50">
+                    <button @click="getAiSuggestion({{ answer.pk }})" class="text-indigo-600 font-semibold flex items-center">
+                        <i class="ph ph-sparkle mr-2"></i> Dapatkan Bantuan Koreksi AI
+                    </button>
+                    <div x-show="aiSuggestions[{{ answer.pk }}]" x-transition class="mt-3">
+                        <div x-show="aiSuggestions[{{ answer.pk }}] === 'loading'" class="text-gray-500">Menganalisis...</div>
+                        <template x-if="aiSuggestions[{{ answer.pk }}] && aiSuggestions[{{ answer.pk }}] !== 'loading'">
+                            <div>
+                                <p class="font-semibold">Saran Skor AI: <span class="text-indigo-700" x-text="`${aiSuggestions[{{ answer.pk }}].suggested_score} / ${aiSuggestions[{{ answer.pk }}].max_score}`"></span></p>
+                                <p class="font-semibold mt-2">Analisis Jawaban:</p>
+                                <p class="text-sm text-gray-600" x-text="aiSuggestions[{{ answer.pk }}].analysis"></p>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <form method="POST" action="#" class="mt-4 flex items-center space-x-3">
+                    {% csrf_token %}
+                    <input type="hidden" name="answer_id" value="{{ answer.pk }}">
+                    <label for="score-{{answer.pk}}" class="font-semibold">Beri Skor:</label>
+                    <input type="number" id="score-{{answer.pk}}" name="score" class="w-24 border-gray-300 rounded-md" min="0" max="{{ answer.question.weight }}">
+                    <button type="submit" class="bg-green-600 text-white py-2 px-4 rounded-md text-sm hover:bg-green-700">Simpan Skor</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="mt-8 text-right">
+        <button class="bg-blue-700 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-800">Selesaikan Koreksi & Umumkan Nilai</button>
+    </div>
+</div>
+
+<script>
+function correctionHandler() {
+    return {
+        aiSuggestions: {}, // Simpan hasil AI di sini: { 'answer_pk': { data } }
+        
+        getAiSuggestion(answerId) {
+            // Tampilkan loading
+            this.aiSuggestions[answerId] = 'loading';
+
+            // URL untuk memanggil view AI (akan kita buat)
+            const url = `/dashboard/teacher/answer/${answerId}/ai-suggestion/`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        this.aiSuggestions[answerId] = { analysis: `Error: ${data.error}` };
+                    } else {
+                        this.aiSuggestions[answerId] = data;
+                    }
+                })
+                .catch(error => {
+                    this.aiSuggestions[answerId] = { analysis: `Gagal memuat bantuan AI. Coba lagi nanti.` };
+                    console.error('Error fetching AI suggestion:', error);
+                });
+        }
+    }
+}
+</script>
+{% endblock %}

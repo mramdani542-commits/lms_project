@@ -1,0 +1,157 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selamat Datang di Sekolah GenIUS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Style untuk Latar Belakang Animasi dan Efek Glow -->
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #0c143c; /* Warna dasar biru tua */
+            overflow: hidden;
+        }
+        
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .btn-glow:hover {
+            box-shadow: 0 0 15px 5px rgba(59, 130, 246, 0.4);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .content-animate {
+            animation: fadeIn 0.7s ease-out forwards;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Canvas untuk animasi latar belakang -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Konten Utama -->
+    <div class="relative flex flex-col items-center justify-center h-screen p-4 z-10">
+        <div class="w-full max-w-3xl text-center text-white p-8 rounded-2xl shadow-2xl bg-white/10 backdrop-blur-lg border border-white/20 content-animate">
+            <img src="{% static 'images/Logo.png' %}" alt="LMS Genius Logo" class="mx-auto w-24 h-auto mb-6">
+            
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 leading-tight" style="text-shadow: 0 0 15px rgba(255,255,255,0.3);">
+                Selamat Datang di Sekolah GenIUS
+            </h1>
+            
+            <p class="text-lg md:text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+                Platform pembelajaran modern untuk mengelola kelas, ujian, dan penilaian dengan mudah dan efisien.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <a href="{% url 'login' %}" class="inline-block w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 btn-glow">
+                    Login
+                </a>
+                <a href="#" class="inline-block w-full sm:w-auto bg-white/20 hover:bg-white/30 text-white font-bold py-3 px-8 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 border border-white/30">
+                    Pelajari Lebih Lanjut
+                </a>
+            </div>
+        </div>
+        
+        <div class="absolute bottom-4 left-0 right-0 text-center text-gray-400 text-xs">
+            <p>&copy; {% now "Y" %} Sekolah GenIUS. All Rights Reserved.</p>
+            <p class="mt-1">Dibuat & Dikembangkan oleh <strong>Anak_Cisoka</strong>.</p>
+        </div>
+    </div>
+
+    <script>
+        // Script untuk Animasi Latar Belakang "Plexus"
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particles = [];
+        const particleCount = 150; // Sedikit lebih banyak partikel untuk halaman home
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 1;
+                this.speedX = Math.random() * 1 - 0.5;
+                this.speedY = Math.random() * 1 - 0.5;
+            }
+            update() {
+                if (this.x > canvas.width || this.x < 0) this.speedX *= -1;
+                if (this.y > canvas.height || this.y < 0) this.speedY *= -1;
+                this.x += this.speedX;
+                this.y += this.speedY;
+            }
+            draw() {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function init() {
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function connect() {
+            let opacityValue = 1;
+            for (let a = 0; a < particles.length; a++) {
+                for (let b = a; b < particles.length; b++) {
+                    const dx = particles[a].x - particles[b].x;
+                    const dy = particles[a].y - particles[b].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < 120) { // Jarak koneksi sedikit lebih jauh
+                        opacityValue = 1 - (distance/120);
+                        ctx.strokeStyle = `rgba(255, 255, 255, ${opacityValue})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[a].x, particles[a].y);
+                        ctx.lineTo(particles[b].x, particles[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+            }
+            connect();
+            requestAnimationFrame(animate);
+        }
+
+        init();
+        animate();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            particles = [];
+            init();
+        });
+    </script>
+</body>
+</html>

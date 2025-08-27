@@ -1,0 +1,33 @@
+{% extends 'dashboard/layouts/base.html' %}
+{% block title %}Dashboard Siswa{% endblock %}
+{% block page_title %}Dashboard Siswa{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+  <!-- Card Ujian -->
+  <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+    <i class="ph-bold ph-exam text-3xl text-blue-500"></i>
+    <h3 class="mt-4 text-lg font-semibold">Ujian Aktif</h3>
+    <p class="text-gray-600">Ikuti ujian yang tersedia</p>
+    <a href="{% url 'exam_management' %}" class="mt-4 inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Lihat Ujian</a>
+  </div>
+
+  <!-- Card Nilai -->
+  <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+    <i class="ph-bold ph-scales text-3xl text-green-500"></i>
+    <h3 class="mt-4 text-lg font-semibold">Nilai Saya</h3>
+    <p class="text-gray-600">Lihat hasil ujian & progres</p>
+    <a href="{% url 'grading_settings' %}" class="mt-4 inline-block bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">Lihat Nilai</a>
+  </div>
+
+</div>
+
+<div class="mt-6 bg-white p-6 rounded-2xl shadow">
+  <h3 class="text-lg font-semibold mb-4">Pengumuman</h3>
+  <ul class="space-y-2">
+    <li class="p-3 rounded-lg bg-gray-50">📢 Ujian Matematika besok jam 09.00 WIB</li>
+    <li class="p-3 rounded-lg bg-gray-50">📢 Deadline pengumpulan tugas Bahasa Inggris hari ini</li>
+  </ul>
+</div>
+{% endblock %}

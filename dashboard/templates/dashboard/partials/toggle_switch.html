@@ -1,0 +1,20 @@
+<div class="flex items-center justify-between">
+    <span class="text-gray-700" x-text="label"></span>
+    <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+        <input type="checkbox" :name="toggle_id" :id="toggle_id" x-model="toggle_variable"
+               class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+        <label :for="toggle_id" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+    </div>
+</div>
+
+<style>
+    .toggle-checkbox:checked {
+        @apply: right-0 border-blue-600;
+        right: 0;
+        border-color: #2563EB;
+    }
+    .toggle-checkbox:checked + .toggle-label {
+        @apply: bg-blue-600;
+        background-color: #2563EB;
+    }
+</style>

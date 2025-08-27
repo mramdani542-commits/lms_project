@@ -1,0 +1,53 @@
+{% extends 'dashboard/layouts/base.html' %}
+{% block title %}Pengaturan Tema{% endblock %}
+{% block page_title %}Pengaturan Tema{% endblock %}
+
+{% block content %}
+<div class="bg-white p-6 rounded-lg shadow-md max-w-md mx-auto" 
+     x-data="{ selectedTheme: '{{ request.user.theme }}' }">
+
+    <h2 class="text-lg font-semibold mb-4">Pilih Tema</h2>
+    <form method="POST" class="space-y-4">
+        {% csrf_token %}
+        
+        <!-- Dropdown -->
+        <label for="id_theme" class="block text-sm font-medium text-gray-700">Tema</label>
+        <select name="theme" id="id_theme" 
+                x-model="selectedTheme"
+                class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <option value="LIGHT">Light</option>
+            <option value="DARK">Dark</option>
+            <option value="BLUE">Blue Ocean</option>
+            <option value="GREEN">Green Forest</option>
+            <option value="PURPLE">Purple Night</option>
+            <option value="NEON">Neon Cyber</option>
+            <option value="RETRO">Retro Terminal</option>
+            <option value="FUTURISTIC">Futuristic Glass</option>
+            <option value="HIGH_CONTRAST">High Contrast</option>
+        </select>
+
+        <!-- Preview -->
+        <div class="mt-6 p-4 rounded-lg border" 
+             :class="{
+                'bg-white text-gray-900': selectedTheme === 'LIGHT',
+                'bg-gray-900 text-white': selectedTheme === 'DARK',
+                'bg-gradient-to-br from-blue-900 to-blue-600 text-white': selectedTheme === 'BLUE',
+                'bg-gradient-to-br from-green-900 to-green-600 text-white': selectedTheme === 'GREEN',
+                'bg-gradient-to-br from-purple-900 to-indigo-700 text-white': selectedTheme === 'PURPLE',
+                'bg-black text-green-400 font-mono': selectedTheme === 'NEON',
+                'bg-black text-green-500 font-mono': selectedTheme === 'RETRO',
+                'bg-gray-900 text-cyan-300 backdrop-blur-md': selectedTheme === 'FUTURISTIC',
+                'bg-black text-yellow-300': selectedTheme === 'HIGH_CONTRAST'
+             }">
+            <h3 class="font-bold">Preview Tema</h3>
+            <p class="text-sm">Contoh tampilan sesuai tema yang dipilih.</p>
+            <button type="button" class="mt-3 px-3 py-1 rounded bg-blue-500 text-white">Tombol</button>
+        </div>
+
+        <!-- Tombol Simpan -->
+        <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 mt-4">
+            Simpan
+        </button>
+    </form>
+</div>
+{% endblock %}

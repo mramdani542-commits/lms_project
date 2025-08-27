@@ -1,0 +1,72 @@
+{% extends 'dashboard/layouts/base.html' %}
+{% block title %}Dashboard Admin{% endblock %}
+{% block page_title %}Dashboard Admin{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+  <!-- Card Statistik -->
+  <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+    <i class="ph-bold ph-users text-3xl text-blue-600"></i>
+    <h3 class="mt-4 text-lg font-semibold">Total Pengguna</h3>
+    <p class="text-2xl font-bold text-gray-800">{{ total_users }}</p>
+  </div>
+
+  <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+    <i class="ph-bold ph-chalkboard-teacher text-3xl text-green-600"></i>
+    <h3 class="mt-4 text-lg font-semibold">Jumlah Guru</h3>
+    <p class="text-2xl font-bold text-gray-800">{{ total_guru }}</p>
+  </div>
+
+  <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+    <i class="ph-bold ph-graduation-cap text-3xl text-purple-600"></i>
+    <h3 class="mt-4 text-lg font-semibold">Jumlah Siswa</h3>
+    <p class="text-2xl font-bold text-gray-800">{{ total_siswa }}</p>
+  </div>
+
+</div>
+
+<!-- Grafik Placeholder -->
+<div class="mt-6 bg-white p-6 rounded-2xl shadow">
+  <h3 class="text-lg font-semibold mb-4">Statistik Pengguna</h3>
+  <div class="w-full h-64 bg-gray-100 flex items-center justify-center rounded-lg">
+    <span class="text-gray-500">[Chart.js / Recharts bisa dimasukkan di sini]</span>
+  </div>
+</div>
+    <div>
+      <canvas id="pieChart"></canvas>
+    </div>
+    
+    <!-- Bar Chart -->
+    <div>
+      <canvas id="barChart"></canvas>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{{ months|json_script:"months-data" }}
+{{ month_counts|json_script:"counts-data" }}
+
+<script>
+  const months = JSON.parse(document.getElementById('months-data').textContent);
+  const monthCounts = JSON.parse(document.getElementById('counts-data').textContent);
+
+  new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+      labels: months,
+      datasets: [{
+        label: 'User Baru per Bulan',
+        data: monthCounts,
+        backgroundColor: '#3b82f6'
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+</script>
+{% endblock %}

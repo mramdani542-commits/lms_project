@@ -1,0 +1,51 @@
+{% extends 'dashboard/layouts/base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title|default:"Masukkan Token Ujian" }}{% endblock %}
+{% block page_title %}Konfirmasi Ujian{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto bg-white p-8 rounded-lg shadow-md text-center">
+    
+    <!-- JUDUL YANG DINAMIS -->
+    <h1 class="text-2xl font-bold mb-2">{{ page_heading|default:"Anda akan memulai ujian:" }}</h1>
+    <p class="text-lg text-indigo-600 font-semibold mb-6">{{ exam.name }}</p>
+
+    <!-- SUB-JUDUL YANG DINAMIS -->
+    <p class="text-gray-600 mb-4">{{ page_subheading|default:"Silakan masukkan token yang diberikan oleh guru Anda untuk memulai ujian." }}</p>
+
+    {% if messages %}
+        {% for message in messages %}
+        <div class="p-3 mb-4 rounded-md text-sm {% if message.tags == 'error' %}bg-red-100 text-red-800{% else %}bg-blue-100 text-blue-800{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- FORM ACTION YANG DINAMIS -->
+    <form method="POST" action="{% url 'exam_start' exam.pk %}">
+        {% csrf_token %}
+        <div class="mb-4">
+            <label for="token" class="sr-only">Token Ujian</label>
+            <input 
+                type="text" 
+                name="token" 
+                id="token"
+                required
+                class="w-full text-center text-2xl font-mono tracking-widest p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="XXXXXX"
+                maxlength="8"
+                style="text-transform:uppercase"
+            >
+        </div>
+        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-md hover:bg-blue-700 transition-colors">
+            {{ button_text|default:"Mulai Kerjakan" }}
+        </button>
+    </form>
+
+    <div class="mt-6">
+        <a href="{% url 'exam_management' %}" class="text-sm text-gray-500 hover:underline">Kembali ke Daftar Ujian</a>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dasbor{% endblock %} - Sekolah GenIUS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="
+    {% if request.user.theme == 'DARK' %} bg-gray-900 text-gray-100
+    {% else %} bg-gray-100 text-gray-900
+    {% endif %}
+">
+    <div x-data="{ sidebarOpen: window.innerWidth > 1024 }" @resize.window="sidebarOpen = window.innerWidth > 1024" class="flex h-screen">
+        
+        <!-- Bingkai Sidebar -->
+        <aside 
+            x-show="sidebarOpen"
+            @click.outside="if (window.innerWidth < 1024) sidebarOpen = false"
+            x-transition:enter="transition ease-in-out duration-300"
+            x-transition:enter-start="-translate-x-full"
+            x-transition:enter-end="translate-x-0"
+            x-transition:leave="transition ease-in-out duration-300"
+            x-transition:leave-start="translate-x-0"
+            x-transition:leave-end="-translate-x-full"
+            class="fixed inset-y-0 left-0 z-30 w-64 lg:static lg:inset-0 lg:translate-x-0"
+            x-cloak
+        >
+            <!-- Memanggil file sidebar yang sesuai untuk mengisi bingkai ini -->
+            {% if request.user.role == 'ADMIN' %}
+                {% include "dashboard/layouts/sidebar_admin.html" %}
+            {% elif request.user.role == 'GURU' or request.user.role == 'WALIKELAS' %}
+                {% include "dashboard/layouts/sidebar_guru.html" %}
+            {% elif request.user.role == 'SISWA' %}
+                {% include "dashboard/layouts/sidebar_siswa.html" %}
+            {% elif request.user.role == 'MANAGER' %}
+                {% include "dashboard/layouts/sidebar_manager.html" %}
+            {% endif %}
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+           <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
+                <div class="flex items-center">
+                    <!-- Tombol untuk Buka/Tutup Sidebar di HP/Tablet -->
+                    <button @click.stop="sidebarOpen = !sidebarOpen" class="text-gray-600 focus:outline-none lg:hidden mr-4">
+                        <i class="ph-bold ph-list text-2xl"></i>
+                    </button>
+                    <h1 class="text-xl font-semibold text-gray-800">{% block page_title %}Dasbor{% endblock %}</h1>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <a href="{% url 'profile' %}" class="text-gray-600 hover:text-blue-600">
+                        Halo, {{ request.user.username }}!
+                    </a>
+                    <img src="{{ request.user.profile_picture.url }}" alt="Foto Profil" class="h-9 w-9 rounded-full object-cover">
+                </div>
+            </header>
+            
+            <main class="flex-1 overflow-x-hidden overflow-y-auto p-6">
+                {% block content %}
+                {% endblock %}
+            </main>
+
+            <footer class="bg-white border-t border-gray-200 p-4 text-center text-sm text-gray-500 flex-shrink-0">
+                Copyright &copy; {% now "Y" %} <strong>Sekolah GenIUS</strong>. All rights reserved. 
+                <span class="mx-2">|</span> 
+                Version 1.0.0 By : Anak_Cisoka
+            </footer>
+        </div>
+    </div>
+</body>
+</html>

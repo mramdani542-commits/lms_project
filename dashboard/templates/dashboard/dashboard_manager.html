@@ -1,0 +1,23 @@
+{% extends 'dashboard/layouts/base.html' %}
+{% block title %}Dashboard Manager{% endblock %}
+{% block page_title %}Dashboard Manager{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+  <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+    <i class="ph-bold ph-users-three text-3xl text-orange-600"></i>
+    <h3 class="mt-4 text-lg font-semibold">Manajemen Staf</h3>
+    <p class="text-gray-600">Kelola data staf sekolah</p>
+    <a href="{% url 'user_management' %}" class="mt-4 inline-block bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700">Kelola</a>
+  </div>
+
+  <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+    <i class="ph-bold ph-graduation-cap text-3xl text-purple-600"></i>
+    <h3 class="mt-4 text-lg font-semibold">Laporan Akademik</h3>
+    <p class="text-gray-600">Pantau performa siswa & guru</p>
+    <a href="#" class="mt-4 inline-block bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">Lihat Laporan</a>
+  </div>
+
+</div>
+{% endblock %}

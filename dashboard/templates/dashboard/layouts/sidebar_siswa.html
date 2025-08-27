@@ -1,0 +1,28 @@
+{% load static %}
+<div class="w-full h-full bg-gradient-to-b from-indigo-700 to-indigo-900 text-white flex flex-col">
+    <div class="h-16 flex items-center justify-center text-2xl font-bold border-b border-green-600">
+        <img src="{% static 'images/Logo.png' %}" alt="Logo" class="h-10 w-10 mr-2">
+        Siswa
+    </div>
+
+    <nav class="flex-1 px-4 py-6 space-y-2">
+        <a href="{% url 'exam_management' %}" class="flex items-center px-3 py-2 rounded-lg hover:bg-green-600 transition">
+            <i class="ph-bold ph-exam mr-3 text-lg"></i> Daftar Ujian
+        </a>
+        <a href="{% url 'grading_settings' %}" class="flex items-center px-3 py-2 rounded-lg hover:bg-green-600 transition">
+            <i class="ph-bold ph-scales mr-3 text-lg"></i> Nilai Saya
+        </a>
+          <a href="{% url 'theme_settings' %}" class="block px-4 py-2 hover:bg-gray-100">
+         Pengaturan Tema
+         </a>
+    </nav>
+
+    <div class="px-4 py-4 border-t border-green-700">
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="w-full flex items-center px-3 py-2 rounded-lg hover:bg-red-600 transition">
+                <i class="ph-bold ph-sign-out mr-3 text-lg"></i> Logout
+            </button>
+        </form>
+    </div>
+</div>

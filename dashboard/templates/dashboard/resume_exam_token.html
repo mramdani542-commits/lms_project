@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Lanjutkan Ujian</title>
+    <!-- Tambahkan CSS Anda di sini -->
+</head>
+<body>
+    <div>
+        <h1>Ujian Dijeda</h1>
+        <p>Sistem mendeteksi Anda meninggalkan halaman ujian. Untuk melanjutkan <strong>{{ exam.title }}</strong>, silakan masukkan kembali token ujian Anda.</p>
+        
+        <form method="post">
+            {% csrf_token %}
+            <label for="token">Token Ujian:</label>
+            <input type="text" id="token" name="token" required>
+            
+            {% if error %}
+                <p style="color: red;">{{ error }}</p>
+            {% endif %}
+            
+            <button type="submit">Lanjutkan Ujian</button>
+        </form>
+    </div>
+</body>
+</html>

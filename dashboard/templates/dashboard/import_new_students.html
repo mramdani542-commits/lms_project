@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Impor Siswa Baru{% endblock %}
+
+{% block content %}
+<div class="flex h-screen bg-gray-100">
+    <!-- Sidebar -->
+    <div class="hidden md:flex flex-col w-64 bg-white shadow-lg">
+        <div class="flex items-center justify-center h-20 shadow-md bg-blue-600 text-white">
+            <h1 class="text-2xl font-bold">Admin Panel</h1>
+        </div>
+        <div class="flex-grow p-4">
+            <nav class="text-base font-medium text-gray-600">
+                <a href="{% url 'admin_dashboard' %}" class="flex items-center mt-4 py-2 px-6 hover:bg-blue-50 hover:text-blue-600 rounded-lg">...</a>
+                <a href="{% url 'user_list' %}" class="flex items-center mt-4 py-2 px-6 bg-blue-100 text-blue-700 rounded-lg">...</a>
+                <a href="{% url 'kelas_list' %}" class="flex items-center mt-4 py-2 px-6 hover:bg-blue-50 hover:text-blue-600 rounded-lg">...</a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <header class="flex justify-between items-center p-6 bg-white border-b-2 border-gray-200">
+            <h1 class="text-2xl text-gray-800 font-semibold">Impor Siswa Baru dari File</h1>
+        </header>
+
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+            <div class="bg-white p-8 rounded-lg shadow-md max-w-4xl mx-auto">
+                <div class="prose max-w-none">
+                    <h3 class="text-lg font-medium text-gray-900">Petunjuk</h3>
+                    <p>Gunakan fitur ini untuk membuat banyak akun siswa baru sekaligus dari file Excel atau CSV.</p>
+                    <ol>
+                        <li>Unduh template file jika Anda belum memilikinya.</li>
+                        <li>Isi data siswa sesuai dengan kolom yang tersedia. Kolom yang wajib diisi adalah: <strong>username, password, first_name,</strong> dan <strong>class_name</strong>.</li>
+                        <li>Pastikan <strong>nama kelas</strong> pada kolom <code>class_name</code> sudah terdaftar di sistem melalui menu "Kelola Kelas".</li>
+                        <li>Unggah file yang sudah diisi, lalu klik "Upload dan Proses".</li>
+                    </ol>
+                </div>
+
+                <form method="POST" enctype="multipart/form-data" class="mt-8 space-y-6">
+                    {% csrf_token %}
+                    <div>
+                        <label for="file_upload" class="block text-sm font-medium text-gray-700">Pilih File (Excel/CSV)</label>
+                        <input type="file" name="file_upload" id="file_upload" required
+                               class="mt-1 block w-full text-sm text-gray-500
+                                      file:mr-4 file:py-2 file:px-4
+                                      file:rounded-md file:border-0
+                                      file:text-sm file:font-semibold
+                                      file:bg-blue-50 file:text-blue-700
+                                      hover:file:bg-blue-100"/>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3">
+                        <a href="{% url 'user_list' %}" class="bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300">
+                            Batal
+                        </a>
+                        <button type="submit" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700">
+                            Upload dan Proses
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}

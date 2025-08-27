@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dasbor Admin - LMS Sekolah Genius</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F0F8FF; /* Sangat biru muda */
+        }
+        /* Custom scrollbar for sidebar */
+        .sidebar-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+        .sidebar-scroll::-webkit-scrollbar-track {
+            background: #e0f2f7; /* Biru muda */
+            border-radius: 10px;
+        }
+        .sidebar-scroll::-webkit-scrollbar-thumb {
+            background: #90CAF9; /* Biru sedang */
+            border-radius: 10px;
+        }
+        .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+            background: #64B5F6; /* Biru lebih gelap */
+        }
+        /* Hide content sections by default */
+        .content-section {
+            display: none;
+        }
+        /* Show active content section */
+        .content-section.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="bg-blue-800 text-white w-64 space-y-6 py-7 px-2 absolute inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition duration-200 ease-in-out z-50 rounded-r-lg shadow-lg flex flex-col">
+        <div class="flex items-center justify-center px-4">
+            <h1 class="text-2xl font-bold text-white">LMS Genius</h1>
+        </div>
+
+        <nav class="flex-grow sidebar-scroll overflow-y-auto">
+            <a href="#" data-section="dashboard" class="sidebar-link block py-2.5 px-4 rounded-lg transition duration-200 hover:bg-blue-700 hover:text-white mb-2 active-link bg-blue-700">
+                Dasbor
+            </a>
+            <a href="#" data-section="user-management" class="sidebar-link block py-2.5 px-4 rounded-lg transition duration-200 hover:bg-blue-700 hover:text-white mb-2">
+                Manajemen Pengguna
+            </a>
+            <a href="#" data-section="class-management" class="sidebar-link block py-2.5 px-4 rounded-lg transition duration-200 hover:bg-blue-700 hover:text-white mb-2">
+                Manajemen Kelas
+            </a>
+            <a href="#" data-section="MataPelajaran-management" class="sidebar-link block py-2.5 px-4 rounded-lg transition duration-200 hover:bg-blue-700 hover:text-white mb-2">
+                Manajemen Mata Pelajaran
+            </a>
+            <a href="#" data-section="exam-settings" class="sidebar-link block py-2.5 px-4 rounded-lg transition duration-200 hover:bg-blue-700 hover:text-white mb-2">
+                Pengaturan Ujian
+            </a>
+            <a href="#" data-section="grading-settings" class="sidebar-link block py-2.5 px-4 rounded-lg transition duration-200 hover:bg-blue-700 hover:text-white mb-2">
+                Penilaian
+            </a>
+            <a href="#" data-section="question-type-settings" class="sidebar-link block py-2.5 px-4 rounded-lg transition duration-200 hover:bg-blue-700 hover:text-white mb-2">
+                Tipe Soal
+            </a>
+            <a href="#" data-section="app-settings" class="sidebar-link block py-2.5 px-4 rounded-lg transition duration-200 hover:bg-blue-700 hover:text-white mb-2">
+                Pengaturan Aplikasi
+            </a>
+        </nav>
+
+        <div class="mt-auto px-4">
+            <a href="#" class="block py-2.5 px-4 rounded-lg transition duration-200 hover:bg-blue-700 hover:text-white">
+                Logout
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <!-- Header -->
+        <header class="flex items-center justify-between bg-white shadow-md p-4 sticky top-0 z-40 rounded-b-lg">
+            <button id="sidebarToggle" class="text-blue-800 focus:outline-none md:hidden p-2 rounded-lg hover:bg-gray-100">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+            <h2 class="text-xl font-semibold text-blue-800">Dasbor Admin</h2>
+            <div class="flex items-center space-x-4">
+                <span class="text-gray-700 font-medium">Halo, Admin!</span>
+                <!-- Avatar placeholder -->
+                <div class="w-10 h-10 bg-blue-200 rounded-full flex items-center justify-center text-blue-800 font-bold">A</div>
+            </div>
+        </header>
+
+        <!-- Content -->
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-white m-4 p-6 rounded-lg shadow-md">
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="content-section active container mx-auto">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">Selamat Datang di Dasbor Admin</h3>
+                <p class="text-gray-600 mb-4">
+                    Di sini Anda dapat mengelola semua aspek LMS Sekolah Genius, mulai dari pengguna, kelas, mata pelajaran, hingga pengaturan ujian online.
+                </p>
+
+                <!-- Contoh Kartu Fitur (Placeholder) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-blue-100 p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1">
+                        <h4 class="text-lg font-semibold text-blue-700 mb-2">Manajemen Siswa</h4>
+                        <p class="text-gray-700 text-sm">Tambahkan, impor, dan kelola data siswa.</p>
+                    </div>
+                    <div class="bg-blue-100 p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1">
+                        <h4 class="text-lg font-semibold text-blue-700 mb-2">Manajemen Guru</h4>
+                        <p class="text-gray-700 text-sm">Tambahkan, impor, dan kelola data guru.</p>
+                    </div>
+                    <div class="bg-blue-100 p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1">
+                        <h4 class="text-lg font-semibold text-blue-700 mb-2">Jadwal Ujian</h4>
+                        <p class="text-gray-700 text-sm">Atur jadwal dan soal ujian online.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Management Section -->
+            <div id="user-management" class="content-section container mx-auto">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">Manajemen Pengguna</h3>
+                <p class="text-gray-600 mb-4">
+                    Tambahkan pengguna baru secara manual atau impor data pengguna dari file Excel.
+                </p>
+
+                <div class="bg-blue-50 p-6 rounded-lg shadow-md mb-6">
+                    <h4 class="text-xl font-semibold text-blue-700 mb-4">Tambah Pengguna Baru</h4>
+                    <form class="mt-4 space-y-4" method="POST">
+                        <!-- CSRF Token untuk Laravel -->
+                        {% csrf_token %} <!-- Token keamanan Django, wajib ada! -->
+
+                        <div class="mb-4">
+                            <label for="nama-lengkap" class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
+                            <input type="text" name="nama_lengkap" id="nama-lengkap" class="..." placeholder="Masukkan nama lengkap">
+                                   class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                   placeholder="Masukkan nama lengkap" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="email" class="block text-gray-700 text-sm font-semibold mb-2">Email</label>
+                            <input type="email" id="email" name="email"
+                                   class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                   placeholder="Masukkan alamat email" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="password" class="block text-gray-700 text-sm font-semibold mb-2">Kata Sandi</label>
+                            <input type="password" id="password" name="password"
+                                   class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                   placeholder="Masukkan kata sandi" required>
+                        </div>
+                        <div class="mb-6">
+                            <label for="role" class="block text-gray-700 text-sm font-semibold mb-2">Peran</label>
+                            <select id="role" name="role"
+                                    class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                    required>
+                                <option value="">Pilih Peran</option>
+                                <option value="admin">Admin</option>
+                                <option value="manager">Manager</option>
+                                <option value="guru">Guru Mata Pelajaran</option>
+                                <option value="wali_kelas">Wali Kelas</option>
+                                <option value="siswa">Siswa</option>
+                            </select>
+                        </div>
+                        <button type="submit"
+                                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:scale-105">
+                            Tambah Pengguna
+                        </button>
+                    </form>
+                </div>
+
+                <div class="bg-blue-50 p-6 rounded-lg shadow-md">
+                    <h4 class="text-xl font-semibold text-blue-700 mb-4">Impor Pengguna dari Excel</h4>
+                    <form action="/admin/users/import" method="POST" enctype="multipart/form-data">
+                        <!-- CSRF Token untuk Laravel -->
+                        @csrf
+                        <div class="mb-4">
+                            <label for="excel_file" class="block text-gray-700 text-sm font-semibold mb-2">Pilih File Excel</label>
+                            <input type="file" id="excel_file" name="excel_file" accept=".xlsx, .xls"
+                                   class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                   required>
+                            <p class="text-xs text-gray-500 mt-1">Format: Nama, Email, Password (opsional), Peran</p>
+                        </div>
+                        <button type="submit"
+                                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:scale-105">
+                            Impor Pengguna
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Class Management Section -->
+            <div id="class-management" class="content-section container mx-auto">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">Manajemen Kelas</h3>
+                <p class="text-gray-600 mb-4">
+                    Tambahkan kelas baru dan kelola daftar kelas yang ada.
+                </p>
+
+                <div class="bg-blue-50 p-6 rounded-lg shadow-md mb-6">
+                    <h4 class="text-xl font-semibold text-blue-700 mb-4">Tambah Kelas Baru</h4>
+                    <form action="/admin/classes" method="POST">
+                        <!-- CSRF Token untuk Laravel -->
+                        @csrf
+                        <div class="mb-4">
+                            <label for="class_name" class="block text-gray-700 text-sm font-semibold mb-2">Nama Kelas</label>
+                            <input type="text" id="class_name" name="name"
+                                   class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                   placeholder="Contoh: 1 SD, 7 SMP, 10 SMA" required>
+                        </div>
+                        <div class="mb-6">
+                            <label for="level" class="block text-gray-700 text-sm font-semibold mb-2">Jenjang</label>
+                            <select id="level" name="level"
+                                    class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                    required>
+                                <option value="">Pilih Jenjang</option>
+                                <option value="SD">SD</option>
+                                <option value="SMP">SMP</option>
+                                <option value="SMA">SMA</option>
+                            </select>
+                        </div>
+                        <button type="submit"
+                                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:scale-105">
+                            Tambah Kelas
+                        </button>
+                    </form>
+                </div>
+
+                <div class="bg-blue-50 p-6 rounded-lg shadow-md">
+                    <h4 class="text-xl font-semibold text-blue-700 mb-4">Daftar Kelas</h4>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white rounded-lg shadow-md">
+                            <thead>
+                                <tr class="bg-blue-100 text-blue-700 uppercase text-sm leading-normal">
+                                    <th class="py-3 px-6 text-left">Nama Kelas</th>
+                                    <th class="py-3 px-6 text-left">Jenjang</th>
+                                    <th class="py-3 px-6 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-gray-600 text-sm font-light">
+                                <!-- Baris kelas akan dimuat dari database di sini -->
+                                <tr class="border-b border-gray-200 hover:bg-gray-100">
+                                    <td class="py-3 px-6 text-left whitespace-nowrap">1 SD</td>
+                                    <td class="py-3 px-6 text-left">SD</td>
+                                    <td class="py-3 px-6 text-center">
+                                        <div class="flex item-center justify-center">
+                                            <button class="w-6 mr-2 transform hover:text-blue-500 hover:scale-110">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                </svg>
+                                            </button>
+                                            <button class="w-6 mr-2 transform hover:text-red-500 hover:scale-110">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="border-b border-gray-200 hover:bg-gray-100">
+                                    <td class="py-3 px-6 text-left whitespace-nowrap">7 SMP</td>
+                                    <td class="py-3 px-6 text-left">SMP</td>
+                                    <td class="py-3 px-6 text-center">
+                                        <div class="flex item-center justify-center">
+                                            <button class="w-6 mr-2 transform hover:text-blue-500 hover:scale-110">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                </svg>
+                                            </button>
+                                            <button class="w-6 mr-2 transform hover:text-red-500 hover:scale-110">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- Tambahkan baris lain sesuai data -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MataPelajaran Management Section -->
+            <div id="MataPelajaran-management" class="content-section container mx-auto">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">Manajemen Mata Pelajaran</h3>
+                <p class="text-gray-600 mb-4">
+                    Tambahkan mata pelajaran baru dan kelola daftar mata pelajaran yang ada.
+                </p>
+
+                <div class="bg-blue-50 p-6 rounded-lg shadow-md mb-6">
+                    <h4 class="text-xl font-semibold text-blue-700 mb-4">Tambah Mata Pelajaran Baru</h4>
+                    <form action="/admin/MataPelajarans" method="POST">
+                        @csrf
+                        <div class="mb-4">
+                            <label for="MataPelajaran_name" class="block text-gray-700 text-sm font-semibold mb-2">Nama Mata Pelajaran</label>
+                            <input type="text" id="MataPelajaran_name" name="name"
+                                   class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                   placeholder="Contoh: Matematika, Bahasa Indonesia" required>
+                        </div>
+                        <div class="mb-6">
+                            <label for="MataPelajaran_description" class="block text-gray-700 text-sm font-semibold mb-2">Deskripsi (Opsional)</label>
+                            <textarea id="MataPelajaran_description" name="description" rows="3"
+                                      class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                      placeholder="Deskripsi singkat mata pelajaran"></textarea>
+                        </div>
+                        <button type="submit"
+                                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:scale-105">
+                            Tambah Mata Pelajaran
+                        </button>
+                    </form>
+                </div>
+
+                <div class="bg-blue-50 p-6 rounded-lg shadow-md">
+                    <h4 class="text-xl font-semibold text-blue-700 mb-4">Daftar Mata Pelajaran</h4>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white rounded-lg shadow-md">
+                            <thead>
+                                <tr class="bg-blue-100 text-blue-700 uppercase text-sm leading-normal">
+                                    <th class="py-3 px-6 text-left">Nama Mata Pelajaran</th>
+                                    <th class="py-3 px-6 text-left">Deskripsi</th>
+                                    <th class="py-3 px-6 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-gray-600 text-sm font-light">
+                                <!-- Baris mata pelajaran akan dimuat dari database di sini -->
+                                <tr class="border-b border-gray-200 hover:bg-gray-100">
+                                    <td class="py-3 px-6 text-left whitespace-nowrap">Matematika</td>
+                                    <td class="py-3 px-6 text-left">Mata pelajaran dasar matematika</td>
+                                    <td class="py-3 px-6 text-center">
+                                        <div class="flex item-center justify-center">
+                                            <button class="w-6 mr-2 transform hover:text-blue-500 hover:scale-110">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                </svg>
+                                            </button>
+                                            <button class="w-6 mr-2 transform hover:text-red-500 hover:scale-110">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- Tambahkan baris lain sesuai data -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exam Settings Section -->
+            <div id="exam-settings" class="content-section container mx-auto">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">Pengaturan Ujian</h3>
+                <p class="text-gray-600 mb-4">
+                    Di sini Anda dapat mengatur jadwal ujian, mengelola soal, dan konfigurasi terkait ujian online.
+                </p>
+
+                <div class="bg-blue-50 p-6 rounded-lg shadow-md mb-6">
+                    <h4 class="text-xl font-semibold text-blue-700 mb-4">Buat Jadwal Ujian Baru</h4>
+                    <form action="/admin/exams" method="POST">
+                        @csrf
+                        <div class="mb-4">
+                            <label for="exam_name" class="block text-gray-700 text-sm font-semibold mb-2">Nama Ujian</label>
+                            <input type="text" id="exam_name" name="name"
+                                   class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                   placeholder="Contoh: Ujian Tengah Semester Matematika" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="exam_MataPelajaran" class="block text-gray-700 text-sm font-semibold mb-2">Mata Pelajaran</label>
+                            <select id="exam_MataPelajaran" name="MataPelajaran_id"
+                                    class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                    required>
+                                <option value="">Pilih Mata Pelajaran</option>
+                                <!-- Opsi akan dimuat dari database -->
+                                <option value="1">Matematika</option>
+                                <option value="2">Bahasa Indonesia</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label for="exam_class" class="block text-gray-700 text-sm font-semibold mb-2">Kelas</label>
+                            <select id="exam_class" name="class_id"
+                                    class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                    required>
+                                <option value="">Pilih Kelas</option>
+                                <!-- Opsi akan dimuat dari database -->
+                                <option value="1">1 SD</option>
+                                <option value="2">7 SMP</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label for="exam_date" class="block text-gray-700 text-sm font-semibold mb-2">Tanggal Ujian</label>
+                                <input type="date" id="exam_date" name="exam_date"
+                                       class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                       required>
+                            </div>
+                            <div>
+                                <label for="exam_time" class="block text-gray-700 text-sm font-semibold mb-2">Waktu Ujian</label>
+                                <input type="time" id="exam_time" name="exam_time"
+                                       class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                       required>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="exam_duration" class="block text-gray-700 text-sm font-semibold mb-2">Durasi (menit)</label>
+                            <input type="number" id="exam_duration" name="duration"
+                                   class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                   placeholder="Contoh: 90" required>
+                        </div>
+                        <div class="mb-6">
+                            <label for="exam_token" class="block text-gray-700 text-sm font-semibold mb-2">Token Ujian (Opsional)</label>
+                            <input type="text" id="exam_token" name="token"
+                                   class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                   placeholder="Biarkan kosong untuk otomatis">
+                        </div>
+                        <button type="submit"
+                                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:scale-105">
+                            Buat Jadwal Ujian
+                        </button>
+                    </form>
+                </div>
+
+                <div class="bg-blue-50 p-6 rounded-lg shadow-md">
+                    <h4 class="text-xl font-semibold text-blue-700 mb-4">Daftar Jadwal Ujian</h4>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white rounded-lg shadow-md">
+                            <thead>
+                                <tr class="bg-blue-100 text-blue-700 uppercase text-sm leading-normal">
+                                    <th class="py-3 px-6 text-left">Nama Ujian</th>
+                                    <th class="py-3 px-6 text-left">Mata Pelajaran</th>
+                                    <th class="py-3 px-6 text-left">Kelas</th>
+                                    <th class="py-3 px-6 text-left">Tanggal & Waktu</th>
+                                    <th class="py-3 px-6 text-left">Durasi</th>
+                                    <th class="py-3 px-6 text-left">Token</th>
+                                    <th class="py-3 px-6 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-gray-600 text-sm font-light">
+                                <!-- Baris jadwal ujian akan dimuat dari database di sini -->
+                                <tr class="border-b border-gray-200 hover:bg-gray-100">
+                                    <td class="py-3 px-6 text-left whitespace-nowrap">UTS Matematika</td>
+                                    <td class="py-3 px-6 text-left">Matematika</td>
+                                    <td class="py-3 px-6 text-left">7 SMP</td>
+                                    <td class="py-3 px-6 text-left">2025-10-20 09:00</td>
+                                    <td class="py-3 px-6 text-left">90 menit</td>
+                                    <td class="py-3 px-6 text-left">MATH2025</td>
+                                    <td class="py-3 px-6 text-center">
+                                        <div class="flex item-center justify-center">
+                                            <button class="w-6 mr-2 transform hover:text-blue-500 hover:scale-110">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                </svg>
+                                            </button>
+                                            <button class="w-6 mr-2 transform hover:text-red-500 hover:scale-110">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- Tambahkan baris lain sesuai data -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grading Settings Section -->
+            <div id="grading-settings" class="content-section container mx-auto">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">Pengaturan Penilaian</h3>
+                <p class="text-gray-600 mb-4">
+                    Atur bobot nilai sumatif dan formatif, serta skema perhitungan nilai akhir.
+                </p>
+
+                <div class="bg-blue-50 p-6 rounded-lg shadow-md mb-6">
+                    <h4 class="text-xl font-semibold text-blue-700 mb-4">Atur Bobot Penilaian</h4>
+                    <form action="/admin/grading-weights" method="POST">
+                        @csrf
+                        <div class="mb-4">
+                            <label for="sumative_weight" class="block text-gray-700 text-sm font-semibold mb-2">Bobot Nilai Sumatif (%)</label>
+                            <input type="number" id="sumative_weight" name="sumative_weight" min="0" max="100"
+                                   class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                   placeholder="Contoh: 60" required>
+                        </div>
+                        <div class="mb-6">
+                            <label for="formative_weight" class="block text-gray-700 text-sm font-semibold mb-2">Bobot Nilai Formatif (%)</label>
+                            <input type="number" id="formative_weight" name="formative_weight" min="0" max="100"
+                                   class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                   placeholder="Contoh: 40" required>
+                            <p class="text-xs text-gray-500 mt-1">Pastikan total bobot adalah 100%.</p>
+                        </div>
+                        <button type="submit"
+                                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:scale-105">
+                            Simpan Bobot Penilaian
+                        </button>
+                    </form>
+                </div>
+
+                <div class="bg-blue-50 p-6 rounded-lg shadow-md">
+                    <h4 class="text-xl font-semibold text-blue-700 mb-4">Skema Perhitungan Nilai</h4>
+                    <p class="text-gray-700 text-sm mb-2">
+                        Anda dapat menentukan bagaimana nilai akhir dihitung dari komponen sumatif dan formatif.
+                    </p>
+                    <p class="text-gray-600">
+                        *Contoh: Nilai Akhir = (Nilai Sumatif * Bobot Sumatif) + (Nilai Formatif * Bobot Formatif)*
+                    </p>
+                    <!-- Ini bisa menjadi area untuk deskripsi atau pengaturan yang lebih kompleks -->
+                </div>
+            </div>
+
+            <!-- Question Type Settings Section -->
+            <div id="question-type-settings" class="content-section container mx-auto">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">Tipe Soal</h3>
+                <p class="text-gray-600 mb-4">
+                    Kelola tipe soal yang tersedia (Pilihan Ganda, Isian Singkat, Esai, dll.) dan tingkat kesulitannya.
+                </p>
+
+                <div class="bg-blue-50 p-6 rounded-lg shadow-md mb-6">
+                    <h4 class="text-xl font-semibold text-blue-700 mb-4">Tambah Tipe Soal Baru</h4>
+                    <form action="/admin/question-types" method="POST">
+                        @csrf
+                        <div class="mb-4">
+                            <label for="question_type_name" class="block text-gray-700 text-sm font-semibold mb-2">Nama Tipe Soal</label>
+                            <input type="text" id="question_type_name" name="name"
+                                   class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                   placeholder="Contoh: Pilihan Ganda, Esai" required>
+                        </div>
+                        <div class="mb-6">
+                            <label for="is_auto_gradable" class="block text-gray-700 text-sm font-semibold mb-2">Bisa Dinilai Otomatis?</label>
+                            <select id="is_auto_gradable" name="is_auto_gradable"
+                                    class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                    required>
+                                <option value="1">Ya</option>
+                                <option value="0">Tidak</option>
+                            </select>
+                            <p class="text-xs text-gray-500 mt-1">Pilih 'Ya' jika tipe soal ini bisa dikoreksi otomatis (misal: Pilihan Ganda).</p>
+                        </div>
+                        <button type="submit"
+                                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:scale-105">
+                            Tambah Tipe Soal
+                        </button>
+                    </form>
+                </div>
+
+                <div class="bg-blue-50 p-6 rounded-lg shadow-md mb-6">
+                    <h4 class="text-xl font-semibold text-blue-700 mb-4">Tambah Tingkat Kesulitan</h4>
+                    <form action="/admin/difficulty-levels" method="POST">
+                        @csrf
+                        <div class="mb-4">
+                            <label for="difficulty_level_name" class="block text-gray-700 text-sm font-semibold mb-2">Nama Tingkat Kesulitan</label>
+                            <input type="text" id="difficulty_level_name" name="name"
+                                   class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                   placeholder="Contoh: Pra-struktura, Unistruktural, Multistruktural, Relasional, Abstrak" required>
+                        </div>
+                        <div class="mb-6">
+                            <label for="difficulty_level_value" class="block text-gray-700 text-sm font-semibold mb-2">Nilai (1-5)</label>
+                            <input type="number" id="difficulty_level_value" name="value" min="1" max="5"
+                                   class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                   placeholder="Contoh: 1 (Pra-struktura), 5 (Abstrak)" required>
+                        </div>
+                        <button type="submit"
+                                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:scale-105">
+                            Tambah Tingkat Kesulitan
+                        </button>
+                    </form>
+                </div>
+
+                <div class="bg-blue-50 p-6 rounded-lg shadow-md">
+                    <h4 class="text-xl font-semibold text-blue-700 mb-4">Daftar Tipe Soal & Kesulitan</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <h5 class="font-semibold text-gray-800 mb-2">Tipe Soal</h5>
+                            <table class="min-w-full bg-white rounded-lg shadow-md">
+                                <thead>
+                                    <tr class="bg-blue-100 text-blue-700 uppercase text-xs leading-normal">
+                                        <th class="py-2 px-4 text-left">Nama</th>
+                                        <th class="py-2 px-4 text-center">Otomatis?</th>
+                                        <th class="py-2 px-4 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-gray-600 text-sm font-light">
+                                    <tr class="border-b border-gray-200 hover:bg-gray-100">
+                                        <td class="py-2 px-4 text-left">Pilihan Ganda</td>
+                                        <td class="py-2 px-4 text-center">Ya</td>
+                                        <td class="py-2 px-4 text-center">
+                                            <button class="w-5 transform hover:text-red-500 hover:scale-110">🗑️</button>
+                                        </td>
+                                    </tr>
+                                    <tr class="border-b border-gray-200 hover:bg-gray-100">
+                                        <td class="py-2 px-4 text-left">Esai</td>
+                                        <td class="py-2 px-4 text-center">Tidak</td>
+                                        <td class="py-2 px-4 text-center">
+                                            <button class="w-5 transform hover:text-red-500 hover:scale-110">🗑️</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div>
+                            <h5 class="font-semibold text-gray-800 mb-2">Tingkat Kesulitan</h5>
+                            <table class="min-w-full bg-white rounded-lg shadow-md">
+                                <thead>
+                                    <tr class="bg-blue-100 text-blue-700 uppercase text-xs leading-normal">
+                                        <th class="py-2 px-4 text-left">Nama</th>
+                                        <th class="py-2 px-4 text-center">Nilai</th>
+                                        <th class="py-2 px-4 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-gray-600 text-sm font-light">
+                                    <tr class="border-b border-gray-200 hover:bg-gray-100">
+                                        <td class="py-2 px-4 text-left">Mudah</td>
+                                        <td class="py-2 px-4 text-center">1</td>
+                                        <td class="py-2 px-4 text-center">
+                                            <button class="w-5 transform hover:text-red-500 hover:scale-110">🗑️</button>
+                                        </td>
+                                    </tr>
+                                    <tr class="border-b border-gray-200 hover:bg-gray-100">
+                                        <td class="py-2 px-4 text-left">Sangat Sulit</td>
+                                        <td class="py-2 px-4 text-center">5</td>
+                                        <td class="py-2 px-4 text-center">
+                                            <button class="w-5 transform hover:text-red-500 hover:scale-110">🗑️</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- App Settings Section -->
+            <div id="app-settings" class="content-section container mx-auto">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">Pengaturan Aplikasi</h3>
+                <p class="text-gray-600 mb-4">
+                    Konfigurasi umum aplikasi seperti nama sekolah, logo, dan notifikasi.
+                </p>
+
+                <div class="bg-blue-50 p-6 rounded-lg shadow-md mb-6">
+                    <h4 class="text-xl font-semibold text-blue-700 mb-4">Informasi Umum</h4>
+                    <form action="/admin/app-settings" method="POST">
+                        @csrf
+                        <div class="mb-4">
+                            <label for="school_name" class="block text-gray-700 text-sm font-semibold mb-2">Nama Sekolah</label>
+                            <input type="text" id="school_name" name="school_name"
+                                   class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                   placeholder="Contoh: Sekolah Genius" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="school_logo" class="block text-gray-700 text-sm font-semibold mb-2">Logo Sekolah (URL)</label>
+                            <input type="url" id="school_logo" name="school_logo_url"
+                                   class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                   placeholder="URL logo sekolah Anda (misal: https://example.com/logo.png)">
+                            <p class="text-xs text-gray-500 mt-1">Gunakan URL langsung ke gambar logo.</p>
+                        </div>
+                        <div class="mb-6">
+                            <label for="contact_email" class="block text-gray-700 text-sm font-semibold mb-2">Email Kontak</label>
+                            <input type="email" id="contact_email" name="contact_email"
+                                   class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                   placeholder="Contoh: info@sekolahgenius.com">
+                        </div>
+                        <button type="submit"
+                                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:scale-105">
+                            Simpan Pengaturan
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Fungsionalitas toggle sidebar untuk mobile
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+
+        sidebarToggle.addEventListener('click', function () {
+            sidebar.classList.toggle('-translate-x-full');
+        });
+
+        // Menutup sidebar saat mengklik di luar sidebar pada mobile
+        document.addEventListener('click', function(event) {
+            if (!sidebar.contains(event.target) && !sidebarToggle.contains(event.target) && window.innerWidth < 768) {
+                sidebar.classList.add('-translate-x-full');
+            }
+        });
+
+        // Menjaga sidebar tetap terlihat di desktop
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 768) {
+                sidebar.classList.remove('-translate-x-full');
+            }
+        });
+
+        // Fungsionalitas navigasi sidebar untuk menampilkan konten
+        const sidebarLinks = document.querySelectorAll('.sidebar-link');
+        const contentSections = document.querySelectorAll('.content-section');
+
+        sidebarLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault(); // Mencegah perilaku default tautan
+
+                // Hapus kelas 'active-link' dari semua tautan sidebar dan 'bg-blue-700'
+                sidebarLinks.forEach(item => {
+                    item.classList.remove('active-link', 'bg-blue-700');
+                });
+
+                // Tambahkan kelas 'active-link' dan 'bg-blue-700' ke tautan yang diklik
+                this.classList.add('active-link', 'bg-blue-700');
+
+                // Sembunyikan semua bagian konten
+                contentSections.forEach(section => {
+                    section.classList.remove('active');
+                });
+
+                // Tampilkan bagian konten yang sesuai dengan data-section
+                const targetSectionId = this.getAttribute('data-section');
+                const targetSection = document.getElementById(targetSectionId);
+                if (targetSection) {
+                    targetSection.classList.add('active');
+                }
+
+                // Tutup sidebar di mobile setelah klik
+                if (window.innerWidth < 768) {
+                    sidebar.classList.add('-translate-x-full');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,692 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Rapor Sekolah</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* bg-gray-100 */
+        }
+
+        /* Styles for printing */
+        @media print {
+            body {
+                background-color: #ffffff;
+                padding: 0;
+                margin: 0;
+            }
+            #app-container, .no-print {
+                display: none; /* Sembunyikan container utama dan tombol saat print */
+            }
+            .print-section {
+                display: block !important; /* Tampilkan hanya bagian yang akan di-print */
+                margin: 0;
+                padding: 0;
+                box-shadow: none;
+                border: none;
+            }
+            .page-break {
+                page-break-after: always;
+            }
+        }
+
+        .report-page {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 2cm;
+            box-sizing: border-box;
+            margin: 1rem auto;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        /* --- SOLUSI WATERMARK --- */
+        /* Menggunakan pseudo-element ::before agar lebih andal saat dicetak */
+        .report-page::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+            width: 70%; /* Lebar watermark */
+            height: 70%; /* Tinggi watermark */
+            transform: translate(-50%, -50%);
+            background-image: url("{% static 'images/Logo.png' %}"); /* Pastikan path ini benar */
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain; /* Agar logo tidak pecah */
+            opacity: 0.08; /* Opacity sedikit lebih rendah agar tidak mengganggu tulisan */
+            z-index: 1; /* Di bawah konten */
+        }
+        
+        .report-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .page-break {
+            page-break-after: always;
+        }
+
+        @media print {
+            body {
+                background-color: #ffffff;
+                margin: 0;
+            }
+            #app-container, .no-print {
+                display: none;
+            }
+            .report-page {
+                margin: 0;
+                box-shadow: none;
+                border: none;
+            }
+            /* --- SOLUSI WATERMARK HILANG SAAT PRINT --- */
+            /* Perintah ini memaksa browser untuk mencetak background */
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+        .hidden {
+            display: none;
+        }
+        @media print {
+            body { background-color: #fff; margin: 0; }
+            #app-container, .no-print { display: none; }
+            .print-section { display: block !important; }
+            .report-page { margin: 0; box-shadow: none; border: none; }
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+        /* Style untuk notifikasi */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #28a745;
+            color: white;
+            padding: 16px;
+            border-radius: 8px;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.5s, transform 0.5s;
+            transform: translateY(-20px);
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .toast.error {
+            background-color: #dc3545;
+        }
+    </style>
+</head>
+<body class="p-6">
+
+<div id="app-container" class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+    <!-- Halaman 1: Daftar Siswa -->
+    <div id="student-list">
+        <h2 class="text-2xl font-bold mb-4 text-center">Daftar Siswa</h2>
+        <table class="w-full border-collapse text-sm">
+            <thead>
+                <tr class="bg-gray-200">
+                    <th class="p-2 border border-gray-300">Nama</th>
+                    <th class="p-2 border border-gray-300">Kelas</th>
+                    <th class="p-2 border border-gray-300 text-center">Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="student-table-body">
+                <!-- Data siswa akan diisi oleh JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Halaman Lihat Nilai (tersembunyi secara default) -->
+    <div id="view-grades-page" class="hidden">
+        <h2 class="text-2xl font-bold mb-4 text-center">Daftar Nilai <span id="view-grades-student-name"></span></h2>
+        <table class="w-full border-collapse text-sm mb-6">
+            <thead>
+                <tr class="bg-gray-200">
+                    <th class="p-2 border border-gray-300">Mata Pelajaran</th>
+                    <th class="p-2 border border-gray-300 text-center">Nilai Akhir</th>
+                </tr>
+            </thead>
+            <tbody id="view-grades-table-body">
+                <!-- Data nilai akan diisi oleh JavaScript -->
+            </tbody>
+        </table>
+        <button onclick="goBackToList()" class="bg-gray-400 text-white px-6 py-2 rounded-full hover:bg-gray-500 transition-colors duration-200">
+            Kembali
+        </button>
+    </div>
+
+    <!-- Halaman Edit Rapor (tersembunyi secara default) -->
+    <div id="edit-report-page" class="hidden">
+        <h2 class="text-2xl font-bold mb-4 text-center">Edit Rapor <span id="edit-report-student-name"></span></h2>
+        <form id="edit-form">
+            <div id="edit-fields-container" class="space-y-4">
+                <!-- Bidang input akan diisi oleh JavaScript -->
+            </div>
+            <div class="mt-6 flex space-x-2">
+                <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition-colors duration-200">
+                    Simpan Perubahan
+                </button>
+                <button type="button" onclick="goBackToList()" class="bg-gray-400 text-white px-6 py-2 rounded-full hover:bg-gray-500 transition-colors duration-200">
+                    Batal
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Container untuk Print, tersembunyi secara default -->
+<div id="print-container" class="print-section hidden">
+    <!-- Halaman 1 Rapor -->
+    <div class="report-page" id="report-page-1">
+        <div class="report-content">
+                        
+            <div class="grid grid-cols-2 gap-x-8 gap-y-1 mb-6 text-sm">
+                <div><span class="font-semibold">Nama Sekolah:</span> <span id="p-school-name"></span></div>
+                <div><span class="font-semibold">Kelas:</span> <span id="p-student-class"></span></div>
+                <div><span class="font-semibold">Alamat:</span> <span id="p-school-address"></span></div>
+                <div><span class="font-semibold">Fase:</span> <span id="p-student-phase"></span></div>
+                <div><span class="font-semibold">Nama Siswa:</span> <span id="p-student-name"></span></div>
+                <div><span class="font-semibold">Semester:</span> <span id="p-student-semester"></span></div>
+                <div><span class="font-semibold">NIS/NISN:</span> <span id="p-student-nisn"></span></div>
+                <div><span class="font-semibold">Tahun Pelajaran:</span> <span id="p-school-year"></span></div>
+            </div>
+
+            <div class="text-center mb-6">
+                <h1 class="text-xl font-bold tracking-wider">LAPORAN HASIL BELAJAR PESERTA DIDIK</h1>
+            </div>
+
+            <h2 class="font-bold text-base mb-2">A. PENCAPAIAN KOMPETENSI</h2>
+            <table class="w-full border-collapse text-xs mb-6">
+                <thead>
+                    <tr class="bg-gray-100 font-semibold">
+                        <th class="border border-black p-2 w-10 text-center">No</th>
+                        <th class="border border-black p-2 text-left">Mata Pelajaran</th>
+                        <th class="border border-black p-2 w-20 text-center">Nilai Akhir</th>
+                        <th class="border border-black p-2 text-left">Deskripsi</th>
+                    </tr>
+                </thead>
+                <tbody id="p-competency-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Halaman 2 Rapor -->
+    <div class="report-page page-break" id="report-page-2">
+         <div class="report-content">
+            <!-- Kop Halaman 2 (opsional, sesuai PDF) -->
+            <div class="grid grid-cols-2 gap-x-8 gap-y-1 mb-6 text-sm">
+                 <div><span class="font-semibold">Nama Sekolah:</span> <span class="p-school-name-page2"></span></div>
+                 <div><span class="font-semibold">Nama Siswa:</span> <span class="p-student-name-page2"></span></div>
+                 <div><span class="font-semibold">Alamat:</span> <span class="p-school-address-page2"></span></div>
+                 <div><span class="font-semibold">NIS/NISN:</span> <span class="p-student-nisn-page2"></span></div>
+            </div>
+
+            <h2 class="font-bold text-base mb-2">B. EKSTRAKURIKULER</h2>
+            <table class="w-full border-collapse text-xs mb-6">
+                <thead>
+                    <tr class="bg-gray-100 font-semibold">
+                        <th class="border border-black p-2 w-10 text-center">No</th>
+                        <th class="border border-black p-2 text-left">Kegiatan Ekstrakurikuler</th>
+                        <th class="border border-black p-2 w-20 text-center">Predikat</th>
+                        <th class="border border-black p-2 text-left">Keterangan</th>
+                    </tr>
+                </thead>
+                <tbody id="p-extracurricular-body"></tbody>
+            </table>
+
+            <h2 class="font-bold text-base mb-2">C. KETIDAKHADIRAN</h2>
+            <table class="w-1/2 border-collapse text-xs mb-6">
+                <tbody>
+                    <tr><td class="border border-black p-2">Sakit</td><td class="border border-black p-2" id="p-absent-sick"></td></tr>
+                    <tr><td class="border border-black p-2">Izin</td><td class="border border-black p-2" id="p-absent-permit"></td></tr>
+                    <tr><td class="border border-black p-2">Tanpa Keterangan</td><td class="border border-black p-2" id="p-absent-alpha"></td></tr>
+                </tbody>
+            </table>
+
+            <h2 class="font-bold text-base mb-2">D. CATATAN WALI KELAS</h2>
+            <div class="border border-black p-2 text-xs h-24 mb-6" id="p-teacher-notes"></div>
+
+            <h2 class="font-bold text-base mb-2">E. TANGGAPAN ORANG TUA/WALI</h2>
+            <div class="border border-black p-2 h-24 mb-6"></div>
+        </div>
+    </div>
+
+    <!-- Halaman 3 Rapor -->
+    <div class="report-page page-break" id="report-page-3">
+        <div class="report-content">
+            <div class="flex justify-between items-start pt-16">
+                 <div class="text-center text-sm">
+                     <p class="mb-16">Mengetahui,</p>
+                     <p class="mb-16">Orang Tua/Wali</p>
+                     <p class="font-bold">(___________________)</p>
+                 </div>
+                 <div class="text-center text-sm">
+                     <p>Tangerang, 20 Juni 2025</p>
+                     <p class="mb-16">Wali Kelas</p>
+                     <p class="font-bold underline" id="p-homeroom-teacher-name"></p>
+                     <p>NIP: <span id="p-homeroom-teacher-nip"></span></p>
+                 </div>
+            </div>
+            <div class="text-center text-sm mt-16">
+                 <p class="mb-16">Mengetahui,</p>
+                 <p class="mb-16">Kepala Sekolah</p>
+                 <p class="font-bold underline" id="p-headmaster-name"></p>
+                 <p>NIP: <span id="p-headmaster-nip"></span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tombol Cetak di luar container print -->
+    <div id="print-button-container" class="text-center mt-6 hidden no-print">
+        <button onclick="window.print()" class="bg-indigo-600 text-white px-6 py-2 rounded-full hover:bg-indigo-700 transition-colors duration-200">
+            Cetak Rapor
+        </button>
+        <button onclick="goBackToList()" class="bg-gray-400 text-white px-6 py-2 rounded-full hover:bg-gray-500 transition-colors duration-200">
+            Kembali ke Daftar
+        </button>
+    </div>
+</div>
+
+
+<script>
+    // Variabel global untuk menyimpan data dari server
+    let studentsData = [];
+
+    // --- PERUBAHAN 1: Mengaktifkan pengambilan data dari server saat halaman dimuat ---
+    document.addEventListener('DOMContentLoaded', () => {
+        // Panggil fungsi untuk mengambil data dari server secara nyata
+        fetchStudentData(); 
+    });
+    
+    // Fungsi untuk mengambil data dari server (API)
+    async function fetchStudentData() {
+        try {
+            // URL ini harus sesuai dengan yang Anda definisikan di urls.py Django
+            const response = await fetch('/api/dashboard/raport-data/'); 
+            if (!response.ok) {
+                throw new Error('Gagal mengambil data siswa');
+            }
+            const data = await response.json();
+            studentsData = data; // Simpan data dari server
+            renderStudentList(studentsData);
+        } catch (error) {
+            console.error('Error:', error);
+            const tableBody = document.getElementById('student-table-body');
+            tableBody.innerHTML = '<tr><td colspan="3" class="text-center p-4 text-red-500">Gagal memuat data. Periksa koneksi atau hubungi admin.</td></tr>';
+        }
+    }
+
+    // Fungsi untuk mendapatkan CSRF token dari cookie (diperlukan untuk POST request di Django)
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+
+    function showSection(sectionId) {
+        // Sembunyikan semua section utama
+        document.getElementById('student-list').classList.add('hidden');
+        document.getElementById('view-grades-page').classList.add('hidden');
+        document.getElementById('edit-report-page').classList.add('hidden');
+        document.getElementById('print-container').classList.add('hidden');
+        document.getElementById('print-button-container').classList.add('hidden');
+        
+        // Tampilkan section yang dipilih
+        if (document.getElementById(sectionId)) {
+            document.getElementById(sectionId).classList.remove('hidden');
+        }
+    }
+
+    function renderStudentList(students) {
+        showSection('student-list');
+        const tableBody = document.getElementById('student-table-body');
+        tableBody.innerHTML = '';
+        if (!students || students.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="3" class="text-center p-4">Tidak ada data siswa di kelas ini.</td></tr>';
+            return;
+        }
+        
+        students.forEach(student => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="p-2 border border-gray-300">${student.nama}</td>
+                <td class="p-2 border border-gray-300">${student.kelas}</td>
+                <td class="p-2 border border-gray-300 text-center">
+                    <div class="flex flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0 items-center justify-center">
+                        <button onclick="prepareAndShowReport('${student.id}')" class="bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700 w-full sm:w-auto">
+                            Cetak
+                        </button>
+                        <button onclick="viewGrades('${student.id}')" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 w-full sm:w-auto">
+                            Lihat Nilai
+                        </button>
+                        <button onclick="editReport('${student.id}')" class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 w-full sm:w-auto">
+                            Edit Rapor
+                        </button>
+                    </div>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+    function initializeTinyMCE() {
+        tinymce.init({
+            selector: '.editable-textarea',
+            plugins: 'autolink lists link charmap searchreplace visualblocks code fullscreen table paste wordcount',
+            toolbar: 'undo redo | blocks | bold italic underline | bullist numlist | alignleft aligncenter alignright | removeformat',
+            height: 250,
+            menubar: false,
+            content_style: 'body { font-family:Inter,sans-serif; font-size:14px }'
+        });
+    }
+
+    function editReport(studentId) {
+        const student = studentsData.find(s => s.id === studentId);
+        if (!student) return;
+
+        showSection('edit-report-page');
+        document.getElementById('edit-report-student-name').textContent = student.nama;
+
+        const editFormContainer = document.getElementById('edit-fields-container');
+        editFormContainer.innerHTML = '';
+        
+        // Buat field untuk setiap mata pelajaran
+        student.mataPelajaran.forEach(mp => {
+            editFormContainer.innerHTML += `
+                <div class="p-4 border rounded-lg bg-gray-50">
+                    <label class="block text-base font-semibold text-gray-800">${mp.nama}</label>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-2">
+                        <div class="md:col-span-1">
+                            <label for="nilai-${mp.no}" class="block text-sm font-medium text-gray-600">Nilai Akhir</label>
+                            <input type="number" step="0.01" id="nilai-${mp.no}" name="nilai-${mp.no}" value="${mp.nilai}" class="mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm">
+                        </div>
+                        <div class="md:col-span-3">
+                            <label for="deskripsi-${mp.no}" class="block text-sm font-medium text-gray-600">Deskripsi Pencapaian</label>
+                            <!-- Tambahkan class 'editable-textarea' di sini -->
+                            <textarea id="deskripsi-${mp.no}" name="deskripsi-${mp.no}" class="editable-textarea">${mp.deskripsi}</textarea>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        // Tambahkan field untuk Catatan Wali Kelas
+        editFormContainer.innerHTML += `
+            <div class="p-4 border rounded-lg bg-gray-50">
+                <label for="catatan-wali-kelas" class="block text-base font-semibold text-gray-800">Catatan Wali Kelas</label>
+                <textarea id="catatan-wali-kelas" name="catatan-wali-kelas" class="editable-textarea">${student.catatanWaliKelas}</textarea>
+            </div>
+        `;
+
+        // Panggil inisialisasi editor SETELAH semua textarea dibuat
+        initializeTinyMCE();
+
+        document.getElementById('edit-form').onsubmit = (event) => {
+            event.preventDefault();
+
+            // Penting: Simpan konten dari editor ke textarea sebelum mengambil data form
+            tinymce.triggerSave();
+
+            const formData = new FormData(event.target);
+            const updatedData = {
+                studentId: student.id,
+                mataPelajaran: [],
+                catatanWaliKelas: formData.get('catatan-wali-kelas') // Ambil data catatan
+            };
+
+            student.mataPelajaran.forEach(mp => {
+                updatedData.mataPelajaran.push({
+                    no: mp.no,
+                    nama: mp.nama,
+                    nilai: parseFloat(formData.get(`nilai-${mp.no}`)),
+                    deskripsi: formData.get(`deskripsi-${mp.no}`)
+                });
+            });
+            
+            saveReportData(updatedData);
+        };
+    }
+    
+    async function saveReportData(data) {
+        const submitButton = document.querySelector('#edit-form button[type="submit"]');
+        submitButton.disabled = true;
+        submitButton.textContent = 'Menyimpan...';
+
+        try {
+            const response = await fetch('/api/dashboard/update_rapor_api/', { // Pastikan URL ini benar
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) throw new Error('Gagal menyimpan data');
+            
+            showToast('Perubahan berhasil disimpan!');
+            fetchStudentData(); // Ambil data terbaru
+            goBackToList();
+
+        } catch (error) {
+            console.error('Error:', error);
+            showToast('Gagal menyimpan perubahan. Coba lagi.', true);
+        } finally {
+            submitButton.disabled = false;
+            submitButton.textContent = 'Simpan Perubahan';
+        }
+    }
+
+    function goBackToList() {
+        // Hapus instance TinyMCE sebelum kembali untuk mencegah error
+        tinymce.remove('.editable-textarea');
+        
+        document.getElementById('app-container').classList.remove('hidden');
+        showSection('student-list');
+    }
+
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('toast-notification');
+        toast.textContent = message;
+        toast.className = 'toast show';
+        if (isError) {
+            toast.classList.add('error');
+        }
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+    function prepareAndShowReport(studentId) {
+        const student = studentsData.find(s => s.id === studentId);
+        if (!student) return;
+
+        // Sembunyikan tampilan daftar siswa
+        document.getElementById('app-container').classList.add('hidden');
+        
+        // Tampilkan container print
+        showSection('print-container');
+        document.getElementById('print-button-container').classList.remove('hidden');
+
+        // --- Isi Halaman 1 ---
+        document.getElementById('p-school-name').textContent = student.infoSekolah.nama;
+        document.getElementById('p-school-address').textContent = student.infoSekolah.alamat;
+        document.getElementById('p-student-name').textContent = student.nama;
+        document.getElementById('p-student-nisn').textContent = student.nisn;
+        document.getElementById('p-student-class').textContent = student.kelas;
+        document.getElementById('p-student-semester').textContent = student.semester;
+        document.getElementById('p-student-phase').textContent = student.fase;
+        document.getElementById('p-school-year').textContent = student.tahunPelajaran;
+
+        const competencyBody = document.getElementById('p-competency-body');
+        competencyBody.innerHTML = '';
+        student.mataPelajaran.forEach(mp => {
+            competencyBody.innerHTML += `
+                <tr>
+                    <td class="border border-black p-2 text-center">${mp.no}</td>
+                    <td class="border border-black p-2">${mp.nama}</td>
+                    <td class="border border-black p-2 text-center">${mp.nilai.toFixed(2)}</td>
+                    <td class="border border-black p-2">${mp.deskripsi}</td>
+                </tr>
+            `;
+        });
+
+        // --- Isi Halaman 2 ---
+        document.querySelector('.p-school-name-page2').textContent = student.infoSekolah.nama;
+        document.querySelector('.p-school-address-page2').textContent = student.infoSekolah.alamat;
+        document.querySelector('.p-student-name-page2').textContent = student.nama;
+        document.querySelector('.p-student-nisn-page2').textContent = student.nisn;
+
+        const extracurricularBody = document.getElementById('p-extracurricular-body');
+        extracurricularBody.innerHTML = '';
+        student.ekstrakurikuler.forEach(ek => {
+            extracurricularBody.innerHTML += `
+                <tr>
+                    <td class="border border-black p-2 text-center">${ek.no}</td>
+                    <td class="border border-black p-2">${ek.nama}</td>
+                    <td class="border border-black p-2 text-center">${ek.predikat}</td>
+                    <td class="border border-black p-2">${ek.keterangan}</td>
+                </tr>
+            `;
+        });
+        document.getElementById('p-absent-sick').textContent = student.ketidakhadiran.sakit;
+        document.getElementById('p-absent-permit').textContent = student.ketidakhadiran.izin;
+        document.getElementById('p-absent-alpha').textContent = student.ketidakhadiran.tanpaKeterangan;
+        document.getElementById('p-teacher-notes').textContent = student.catatanWaliKelas;
+
+        // --- Isi Halaman 3 ---
+        document.getElementById('p-homeroom-teacher-name').textContent = student.infoWaliKelas.nama;
+        document.getElementById('p-homeroom-teacher-nip').textContent = student.infoWaliKelas.nip;
+        document.getElementById('p-headmaster-name').textContent = student.infoSekolah.kepalaSekolah;
+        document.getElementById('p-headmaster-nip').textContent = student.infoSekolah.nipKepsek;
+    }
+
+    function viewGrades(studentId) {
+        const student = studentsData.find(s => s.id === studentId);
+        if (!student) return;
+
+        showSection('view-grades-page');
+        document.getElementById('view-grades-student-name').textContent = student.nama;
+        
+        const gradesTable = document.getElementById('view-grades-table-body');
+        gradesTable.innerHTML = '';
+        student.mataPelajaran.forEach(mp => {
+            gradesTable.innerHTML += `
+                <tr>
+                    <td class="p-2 border border-gray-300">${mp.nama}</td>
+                    <td class="p-2 border border-gray-300 text-center">${mp.nilai.toFixed(2)}</td>
+                </tr>
+            `;
+        });
+    }
+
+    function editReport(studentId) {
+        const student = studentsData.find(s => s.id === studentId);
+        if (!student) return;
+
+        showSection('edit-report-page');
+        document.getElementById('edit-report-student-name').textContent = student.nama;
+
+        const editFormContainer = document.getElementById('edit-fields-container');
+        editFormContainer.innerHTML = '';
+        
+        student.mataPelajaran.forEach(mp => {
+            editFormContainer.innerHTML += `
+                <div class="p-3 border rounded-md">
+                    <label for="nilai-${mp.no}" class="block text-sm font-medium text-gray-700">${mp.nama}</label>
+                    <input type="number" step="0.01" id="nilai-${mp.no}" name="nilai-${mp.no}" value="${mp.nilai}" class="mt-1 p-2 w-full border border-gray-300 rounded-md">
+                    <label for="deskripsi-${mp.no}" class="block text-sm font-medium text-gray-700 mt-2">Deskripsi</label>
+                    <textarea id="deskripsi-${mp.no}" name="deskripsi-${mp.no}" rows="3" class="mt-1 p-2 w-full border border-gray-300 rounded-md">${mp.deskripsi}</textarea>
+                </div>
+            `;
+        });
+
+        document.getElementById('edit-form').onsubmit = (event) => {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const updatedData = {
+                studentId: student.id,
+                mataPelajaran: []
+            };
+
+            student.mataPelajaran.forEach(mp => {
+                const updatedMp = {
+                    no: mp.no,
+                    nama: mp.nama,
+                    nilai: parseFloat(formData.get(`nilai-${mp.no}`)),
+                    deskripsi: formData.get(`deskripsi-${mp.no}`)
+                };
+                updatedData.mataPelajaran.push(updatedMp);
+            });
+            
+            // --- PERUBAHAN 2: Mengaktifkan pengiriman data ke server ---
+            saveReportData(updatedData);
+        };
+    }
+    
+    // Fungsi untuk menyimpan data ke server
+    async function saveReportData(data) {
+        try {
+            // URL ini harus sesuai dengan API untuk update di urls.py
+            const response = await fetch('/api/dashboard/raport-update/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Header ini penting untuk keamanan Django
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                throw new Error('Gagal menyimpan data');
+            }
+            
+            const result = await response.json();
+            alert('Perubahan berhasil disimpan di server!');
+            
+            // Ambil data terbaru dari server setelah menyimpan
+            fetchStudentData();
+            goBackToList();
+
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Gagal menyimpan perubahan. Coba lagi.');
+        }
+    }
+
+
+    function goBackToList() {
+        document.getElementById('app-container').classList.remove('hidden');
+        showSection('student-list');
+    }
+</script>
+
+</body>
+</html>

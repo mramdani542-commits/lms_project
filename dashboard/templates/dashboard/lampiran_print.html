@@ -1,0 +1,38 @@
+{% extends 'dashboard/layouts/base.html' %}
+{% load static %}
+
+{% block title %}Cetak Rapor{% endblock %}
+{% block page_title %}Cetak Rapor{% endblock %}
+
+{% block content %}
+<div class="bg-white p-6 rounded-xl shadow">
+  <h2 class="text-xl font-bold mb-4">Daftar Siswa</h2>
+  <table class="w-full border border-gray-300 rounded-lg">
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="px-4 py-2 border">Nama</th>
+        <th class="px-4 py-2 border">Kelas</th>
+        <th class="px-4 py-2 border">Aksi</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in siswa %}
+      <tr>
+        <!-- Perbaikan di sini: gunakan get_full_name -->
+        <td class="px-4 py-2 border">{{ s.get_full_name|default:s.username }}</td>
+        <!-- Perbaikan di sini: tampilkan nama kelasnya saja -->
+        <td class="px-4 py-2 border">{{ s.class_group.name|default:"-" }}</td>
+        <td class="px-4 py-2 border">
+          <a href="{% url 'rapor_print' %}" 
+             class="bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700"
+             target="_blank"> <!-- target="_blank" agar membuka di tab baru -->
+             Cetak
+          </a>
+      </tr>
+      {% empty %}
+      <tr><td colspan="3" class="text-center p-4">Belum ada data siswa</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

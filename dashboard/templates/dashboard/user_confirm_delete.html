@@ -1,0 +1,18 @@
+{% extends 'dashboard/layouts/base.html' %}
+
+{% block title %}Konfirmasi Hapus{% endblock %}
+{% block page_title %}Konfirmasi Hapus Pengguna{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto bg-white p-8 rounded-lg shadow-lg text-center">
+    <h1 class="text-2xl font-bold mb-4">Apakah Anda yakin?</h1>
+    <p class="mb-6">Anda akan menghapus pengguna: <strong>{{ user_to_delete.username }}</strong>. Tindakan ini tidak dapat diurungkan.</p>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="flex items-center justify-center space-x-4">
+            <a href="{% url 'user_management' %}" class="bg-gray-200 text-gray-800 py-2 px-6 rounded-md hover:bg-gray-300">Batal</a>
+            <button type="submit" class="bg-red-600 text-white py-2 px-6 rounded-md hover:bg-red-700">Ya, Hapus</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

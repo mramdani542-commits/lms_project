@@ -1,0 +1,112 @@
+{% extends 'dashboard/layouts/base.html' %}
+
+{% block title %}Profil Guru: {{ teacher.get_full_name|default:teacher.username }}{% endblock %}
+{% block page_title %}Profil Guru{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Kolom Kiri: Informasi Personal -->
+    <div class="lg:col-span-1 space-y-6">
+        <div class="bg-white p-6 rounded-lg shadow-md text-center">
+            {% if teacher.profile_picture %}
+                <img src="{{ teacher.profile_picture.url }}" alt="Foto Profil" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover">
+            {% else %}
+                <div class="w-24 h-24 rounded-full mx-auto mb-4 bg-gray-200 flex items-center justify-center">
+                    <span class="text-3xl text-gray-500">{{ teacher.username|first|upper }}</span>
+                </div>
+            {% endif %}
+            <h2 class="text-2xl font-bold">{{ teacher.get_full_name|default:teacher.username }}</h2>
+            <p class="text-gray-500">{{ teacher.get_role_display }}</p>
+        </div>
+
+        <!-- Informasi Tambahan -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-lg font-semibold mb-4">Informasi Tambahan</h3>
+            <dl class="space-y-4 text-left">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Nomor Induk Pegawai</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ teacher.employee_id|default:"-" }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Email</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ teacher.email|default:"-" }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Jabatan</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ teacher.position|default:"-" }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Mengajar Kelas</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ teacher.classes_taught|default:"-" }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Mata Pelajaran</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ teacher.MataPelajaran_taught|default:"-" }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Tahun Bergabung</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ teacher.year_joined|default:"-" }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Alamat</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ teacher.address|default:"-" }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Nomor HP</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ teacher.phone_number|default:"-" }}</dd>
+                </div>
+            </dl>
+        </div>
+
+        <!-- Tombol Edit Profil -->
+        {% if request.user == teacher %}
+        <div class="bg-white p-4 rounded-lg shadow-md text-center">
+            <a href="{% url 'edit_teacher_profile' teacher.id %}" class="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded-md">
+                Edit Profil
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Kolom Kanan -->
+    <div class="lg:col-span-2 space-y-6">
+        <!-- Tugas Mengajar -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-lg font-semibold mb-4">Tugas Mengajar</h3>
+            <p class="text-sm text-gray-500">Fitur ini belum diimplementasikan.</p>
+        </div>
+
+        <!-- Evaluasi Kinerja -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-lg font-semibold mb-4">Evaluasi Kinerja</h3>
+            {% if request.user.role == 'MANAGER' %}
+            <div class="mb-6 border-b pb-6">
+                <form method="POST">
+                    {% csrf_token %}
+                    {{ evaluation_form.as_p }}
+                    <button type="submit" name="submit_evaluation" class="mt-2 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
+                        Simpan Evaluasi
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+
+            {% if request.user.role == 'MANAGER' or request.user == teacher %}
+            <div class="space-y-4">
+                <h4 class="text-md font-semibold text-gray-700">Riwayat Evaluasi</h4>
+                {% for evaluation in evaluations %}
+                <div class="border rounded-md p-4 bg-gray-50">
+                    <p class="text-sm text-gray-800">{{ evaluation.content|linebreaks }}</p>
+                    <p class="text-xs text-gray-500 mt-2 text-right">
+                        Oleh: <strong>{{ evaluation.evaluator.get_full_name|default:"N/A" }}</strong> - {{ evaluation.created_at|date:"d F Y, H:i" }}
+                    </p>
+                </div>
+                {% empty %}
+                <p class="text-sm text-gray-500">Belum ada evaluasi kinerja untuk guru ini.</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

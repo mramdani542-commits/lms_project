@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mengerjakan: {{ exam.name }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        /* Mencegah user menyeleksi teks soal untuk copy-paste */
+        .no-select { -webkit-user-select: none; -ms-user-select: none; user-select: none; }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+
+<div class="no-select" x-data="examHandler({{ questions_json|safe }}, {{ exam.duration_minutes }})" x-init="startExam()" @keydown.escape.prevent @contextmenu.prevent>
+    <header class="bg-white shadow-md p-4 flex justify-between items-center fixed top-0 left-0 right-0 z-10">
+        <div>
+            <h1 class="text-xl font-bold text-gray-800">{{ exam.name }}</h1>
+            <p class="text-sm text-gray-600">{{ exam.MataPelajaran.name }}</p>
+        </div>
+        <div class="flex items-center space-x-4">
+            <div class="bg-red-100 text-red-700 font-bold px-4 py-2 rounded-lg flex items-center">
+                <i class="ph ph-timer mr-2"></i>
+                <span x-text="formatTime(timeLeft)"></span>
+            </div>
+            <button @click="confirmSubmit()" class="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700">
+                Kumpulkan Jawaban
+            </button>
+        </div>
+    </header>
+
+    <div class="flex pt-20">
+        <main class="flex-1 p-8">
+            <div x-show="!submitted">
+                <template x-for="(question, index) in questions" :key="question.id">
+                    <div x-show="currentIndex === index" class="bg-white p-6 rounded-lg shadow-md min-h-[60vh]">
+                        <p class="font-semibold mb-2 text-gray-600">Soal Nomor <span x-text="index + 1" class="font-bold text-gray-800"></span></p>
+                        <div class="prose max-w-none text-lg" x-html="question.text"></div>
+                        
+                        <template x-if="question.type === 'PILIHAN_GANDA'">
+                            <div class="mt-6 space-y-3">
+                                <template x-for="(optionText, optionKey) in question.options" :key="optionKey">
+                                    <label class="flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all" 
+                                           :class="answers[question.id] === optionKey ? 'bg-blue-50 border-blue-500 shadow' : 'border-gray-200 hover:border-blue-400'">
+                                        <input type="radio" :name="`q_${question.id}`" :value="optionKey" x-model="answers[question.id]" class="w-5 h-5 mr-4">
+                                        <span class="font-bold mr-2" x-text="`${optionKey}.`"></span>
+                                        <span x-text="optionText"></span>
+                                    </label>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+            <div x-show="submitted" class="text-center bg-white p-10 rounded-lg shadow-md">
+                <i class="ph-bold ph-check-circle text-6xl text-green-500 mb-4"></i>
+                <h2 class="text-2xl font-bold">Ujian Telah Selesai!</h2>
+                <p class="text-gray-600 mt-2">Jawaban Anda telah berhasil dikumpulkan. Halaman akan tertutup.</p>
+            </div>
+        </main>
+
+        <aside class="w-72 bg-white p-6 shadow-lg h-screen sticky top-20">
+            <h3 class="font-bold mb-4">Navigasi Soal</h3>
+            <div class="grid grid-cols-5 gap-2">
+                <template x-for="(question, index) in questions" :key="index">
+                    <button @click="currentIndex = index"
+                            :class="{
+                                'bg-blue-600 text-white ring-2 ring-blue-300': currentIndex === index, 
+                                'bg-green-200 text-green-800 font-bold': answers[question.id] && currentIndex !== index,
+                                'bg-gray-200 hover:bg-gray-300': !answers[question.id] && currentIndex !== index
+                            }"
+                            class="h-10 w-10 flex items-center justify-center rounded-md font-semibold transition-colors"
+                            x-text="index + 1">
+                    </button>
+                </template>
+            </div>
+        </aside>
+    </div>
+    
+    <form id="exam-form" method="POST" action="{% url 'exam_submit' exam.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="answers" :value="JSON.stringify(answers)">
+    </form>
+</div>
+
+<script>
+function examHandler(questionsData, durationMinutes) {
+    return {
+        questions: questionsData,
+        currentIndex: 0,
+        answers: {},
+        timeLeft: durationMinutes * 60,
+        submitted: false,
+        timer: null,
+
+        startExam() {
+            // Memaksa Fullscreen saat ujian dimulai
+            document.documentElement.requestFullscreen().catch(err => {
+                alert(`Error: Tidak bisa masuk mode layar penuh. Ujian tidak bisa dimulai.`);
+            });
+
+            // Peringatan jika siswa mencoba pindah tab/window
+            window.addEventListener('blur', () => {
+                alert('PERINGATAN: ANDA MENCOBA MENINGGALKAN HALAMAN UJIAN! TINDAKAN INI DAPAT TERCATAT.');
+            });
+
+            // Mulai Timer
+            this.timer = setInterval(() => {
+                if (this.timeLeft > 0 && !this.submitted) {
+                    this.timeLeft--;
+                } else if (this.timeLeft <= 0 && !this.submitted) {
+                    alert('Waktu habis! Jawaban Anda akan dikumpulkan secara otomatis.');
+                    this.submitExam();
+                }
+            }, 1000);
+        },
+
+        formatTime(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
+            return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        },
+
+        confirmSubmit() {
+            if (confirm('Apakah Anda yakin ingin mengumpulkan jawaban sekarang?')) {
+                this.submitExam();
+            }
+        },
+
+        submitExam() {
+            if (this.submitted) return;
+            clearInterval(this.timer);
+            this.submitted = true;
+            console.log("Mengirim jawaban:", JSON.stringify(this.answers));
+            // Menunggu sebentar sebelum submit agar user melihat pesan
+            setTimeout(() => {
+                document.getElementById('exam-form').submit();
+            }, 1500);
+        }
+    }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,67 @@
+{% extends 'dashboard/layouts/base.html' %}
+
+{% block title %}Edit Kelas: {{ class_instance.name }}{% endblock %}
+{% block page_title %}Edit Kelas: {{ class_instance.name }}{% endblock %}
+
+{% block content %}
+<div class="flex justify-center">
+    <div class="w-full lg:w-1/2">
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-6 text-center">Edit Data Kelas</h2>
+            
+            <form method="POST">
+                {% csrf_token %}
+                
+                <!-- Field untuk Nama Kelas -->
+                <div class="mb-4">
+                    <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.name.label }}</label>
+                    <div class="mt-1">
+                        {{ form.name }}
+                    </div>
+                    {% if form.name.help_text %}
+                        <p class="mt-1 text-xs text-gray-500">{{ form.name.help_text|safe }}</p>
+                    {% endif %}
+                    {% for error in form.name.errors %}
+                        <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <!-- Field untuk Jenjang/Tingkat -->
+                <div class="mb-4">
+                    <label for="{{ form.level.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.level.label }}</label>
+                    <div class="mt-1">
+                        {{ form.level }}
+                    </div>
+                    {% if form.level.help_text %}
+                        <p class="mt-1 text-xs text-gray-500">{{ form.level.help_text|safe }}</p>
+                    {% endif %}
+                    {% for error in form.level.errors %}
+                        <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <!-- Field untuk Wali Kelas -->
+                <div class="mb-4">
+                    <label for="{{ form.homeroom_teacher.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.homeroom_teacher.label }}</label>
+                    <div class="mt-1">
+                        {{ form.homeroom_teacher }}
+                    </div>
+                    {% if form.homeroom_teacher.help_text %}
+                        <p class="mt-1 text-xs text-gray-500">{{ form.homeroom_teacher.help_text|safe }}</p>
+                    {% endif %}
+                    {% for error in form.homeroom_teacher.errors %}
+                        <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div class="flex items-center justify-between mt-6">
+                    <a href="{% url 'class_management' %}" class="text-sm text-gray-600 hover:underline">Batal</a>
+                    <button type="submit" class="bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Simpan Perubahan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

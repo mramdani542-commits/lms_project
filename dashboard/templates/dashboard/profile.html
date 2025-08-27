@@ -1,0 +1,67 @@
+{% extends 'dashboard/layouts/base.html' %}
+
+{% block title %}Profil Saya{% endblock %}
+{% block page_title %}Profil Saya{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Kolom Kiri: Foto & Info -->
+    <div class="lg:col-span-1 space-y-6">
+        <!-- Blok Info Personal -->
+        <div class="bg-white p-6 rounded-lg shadow-md text-center">
+            {% if user.profile_picture %}
+                <img src="{{ user.profile_picture.url }}" alt="Foto Profil" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover">
+            {% else %}
+                <div class="w-24 h-24 rounded-full mx-auto mb-4 bg-gray-200 flex items-center justify-center">
+                    <span class="text-3xl text-gray-500">{{ user.username|first|upper }}</span>
+                </div>
+            {% endif %}
+            <h2 class="text-2xl font-bold">{{ user.get_full_name|default:user.username }}</h2>
+            <p class="text-gray-500">{{ user.get_role_display }}</p>
+        </div>
+        
+        <!-- Tampilkan blok ini HANYA untuk GURU & WALIKELAS (HANYA SATU KALI) -->
+        {% if user.role == 'GURU' or user.role == 'WALIKELAS' %}
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-lg font-semibold mb-4">Informasi Tambahan</h3>
+            <dl class="space-y-4 text-left">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Nomor Induk Pegawai</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ user.employee_id|default:"-" }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Tanggal Bergabung</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ user.join_date|date:"d F Y"|default:"-" }}</dd>
+                </div>
+            </dl>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Kolom Kanan: Form & Detail -->
+    <div class="lg:col-span-2 space-y-6">
+        <!-- Form Edit Info Dasar -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-lg font-semibold mb-4">Edit Informasi Profil</h3>
+            <!-- Asumsi Anda punya form bernama 'profile_form' dari view -->
+            <form method="POST" enctype="multipart/form-data" class="space-y-4">
+                {% csrf_token %}
+                <!-- Contoh render form -->
+                {{ profile_form.as_p }}
+                <button type="submit" name="update_profile" class="bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700">Simpan Perubahan</button>
+            </form>
+        </div>
+
+        <!-- Form Ganti Password -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-lg font-semibold mb-4">Ganti Password</h3>
+            <!-- Asumsi Anda punya form bernama 'password_change_form' dari view -->
+            <form method="POST" class="space-y-4">
+                {% csrf_token %}
+                {{ password_change_form.as_p }}
+                <button type="submit" name="change_password" class="bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700">Ganti Password</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

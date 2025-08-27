@@ -1,0 +1,30 @@
+{% extends 'dashboard/layouts/base.html' %}
+{% block title %}Dashboard Guru{% endblock %}
+{% block page_title %}Dashboard Guru{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+  <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+    <i class="ph-bold ph-question text-3xl text-indigo-600"></i>
+    <h3 class="mt-4 text-lg font-semibold">Bank Soal</h3>
+    <p class="text-gray-600">Kelola dan buat soal ujian</p>
+    <a href="{% url 'question_management' %}" class="mt-4 inline-block bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">Kelola</a>
+  </div>
+
+  <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+    <i class="ph-bold ph-exam text-3xl text-pink-600"></i>
+    <h3 class="mt-4 text-lg font-semibold">Manajemen Ujian</h3>
+    <p class="text-gray-600">Atur jadwal & pelaksanaan ujian</p>
+    <a href="{% url 'exam_management' %}" class="mt-4 inline-block bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700">Kelola</a>
+  </div>
+
+  <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+    <i class="ph-bold ph-check-square-offset text-3xl text-teal-600"></i>
+    <h3 class="mt-4 text-lg font-semibold">Koreksi Ujian</h3>
+    <p class="text-gray-600">Periksa & beri nilai ujian</p>
+    <a href="{% url 'correction_list' %}" class="mt-4 inline-block bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700">Kelola</a>
+  </div>
+
+</div>
+{% endblock %}

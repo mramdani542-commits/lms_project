@@ -1,0 +1,92 @@
+{% extends 'dashboard/layouts/base.html' %}
+
+{% block title %}Kelola Siswa di Kelas {{ class_group.name }}{% endblock %}
+{% block page_title %}Kelola Siswa di Kelas {{ class_group.name }}{% endblock %}
+
+{% block content %}
+
+{% comment %} Menampilkan pesan notifikasi (sukses atau error) {% endcomment %}
+{% if messages %}
+    {% for message in messages %}
+        <div class="p-4 mb-4 rounded-md {% if message.tags == 'success' %} bg-green-100 text-green-700 {% elif message.tags == 'warning' %} bg-yellow-100 text-yellow-700 {% else %} bg-red-100 text-red-700 {% endif %}">
+            {{ message|safe }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    
+    <!-- Kolom Kiri: Daftar Siswa yang Sudah Terdaftar -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold">Siswa Terdaftar ({{ enrolled_students.count }})</h2>
+            {% if enrolled_students %}
+            <a href="{% url 'export_class_students' class_group.pk %}" class="bg-green-500 text-white py-2 px-4 rounded-md text-sm hover:bg-green-600">Export Siswa</a>
+            {% endif %}
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for student in enrolled_students %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ student.get_full_name|default:student.username }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <a href="{% url 'unenroll_student' class_pk=class_group.pk student_pk=student.pk %}" class="text-red-600 hover:text-red-900" onclick="return confirm('Anda yakin ingin mengeluarkan siswa ini?')">Keluarkan</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2" class="px-6 py-4 text-center text-gray-500">Belum ada siswa di kelas ini.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Kolom Kanan: Opsi Pendaftaran -->
+    <div class="flex flex-col space-y-6">
+        <!-- Opsi 1: Impor & Buat Siswa Baru -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-lg font-semibold mb-2">1. Impor & Buat Akun Siswa Baru</h3>
+            <p class="text-sm text-gray-600 mb-4">Buat akun siswa baru dan langsung daftarkan ke kelas ini.</p>
+            <a href="{% url 'export_new_student_template' %}" class="text-sm text-blue-600 hover:underline mb-4 block">Unduh template Excel di sini.</a>
+            <form action="{% url 'import_new_students_to_class' class_group.pk %}" method="POST" enctype="multipart/form-data" class="space-y-3">
+            {% csrf_token %}
+            <input type="file" name="excel_file" required accept=".xlsx, .xls" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"/>
+            <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700">
+            Upload dan Buat Akun
+            </button>
+            </form>
+        </div>
+
+        <!-- Opsi 2: Pendaftaran Manual (Siswa yang Sudah Ada) -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-lg font-semibold mb-2">2. Pendaftaran Manual</h3>
+            <p class="text-sm text-gray-600 mb-4">Pilih siswa dari daftar yang belum memiliki kelas.</p>
+            <form method="POST" action="{% url 'enroll_students' class_group.pk %}">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label for="students" class="block text-sm font-medium text-gray-700">Pilih Siswa</label>
+                    <select name="students" id="students" multiple class="mt-1 block w-full h-48 p-2 border border-gray-300 rounded-md">
+                        {% for student in unenrolled_students %}
+                            <option value="{{ student.pk }}">{{ student.get_full_name|default:student.username }} (NIS: {{ student.nis|default:'N/A' }})</option>
+                        {% empty %}
+                            <option disabled>Semua siswa sudah memiliki kelas.</option>
+                        {% endfor %}
+                    </select>
+                    <p class="mt-1 text-xs text-gray-500">Tahan Ctrl (atau Cmd di Mac) untuk memilih lebih dari satu.</p>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Daftarkan Siswa Terpilih</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

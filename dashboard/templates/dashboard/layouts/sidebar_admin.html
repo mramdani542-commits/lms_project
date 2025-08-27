@@ -1,0 +1,43 @@
+{% load static %}
+<div class="w-full h-full bg-gradient-to-b from-indigo-700 to-indigo-900 text-white flex flex-col">
+    <!-- Logo -->
+    <div class="h-16 flex items-center justify-center text-2xl font-bold border-b border-blue-600">
+        <img src="{% static 'images/Logo.png' %}" alt="Logo" class="h-10 w-10 mr-2">
+        Admin
+    </div>
+
+    <!-- Menu -->
+    <nav class="flex-1 px-4 py-6 space-y-2">
+        <a href="{% url 'user_management' %}" class="flex items-center px-3 py-2 rounded-lg hover:bg-blue-600 transition">
+            <i class="ph-bold ph-users mr-3 text-lg"></i> Manajemen Pengguna
+        </a>
+        <a href="{% url 'class_management' %}" class="flex items-center px-3 py-2 rounded-lg hover:bg-blue-600 transition">
+            <i class="ph-bold ph-chalkboard-teacher mr-3 text-lg"></i> Manajemen Kelas
+        </a>
+        <a href="{% url 'MataPelajaran_management' %}" class="flex items-center px-3 py-2 rounded-lg hover:bg-blue-600 transition">
+            <i class="ph-bold ph-book-open mr-3 text-lg"></i> Manajemen Mapel
+        </a>
+        <a href="{% url 'question_management' %}" class="flex items-center px-3 py-2 rounded-lg hover:bg-blue-600 transition">
+            <i class="ph-bold ph-question mr-3 text-lg"></i> Bank Soal
+        </a>
+        <a href="{% url 'exam_management' %}" class="flex items-center px-3 py-2 rounded-lg hover:bg-blue-600 transition">
+            <i class="ph-bold ph-exam mr-3 text-lg"></i> Manajemen Ujian
+        </a>
+        <a href="{% url 'grading_settings' %}" class="flex items-center px-3 py-2 rounded-lg hover:bg-blue-600 transition">
+            <i class="ph-bold ph-scales mr-3 text-lg"></i> Pengaturan Nilai
+        </a>
+          <a href="{% url 'theme_settings' %}" class="block px-4 py-2 hover:bg-gray-100">
+         Pengaturan Tema
+         </a>
+    </nav>
+
+    <!-- Logout -->
+    <div class="px-4 py-4 border-t border-blue-700">
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="w-full flex items-center px-3 py-2 rounded-lg hover:bg-red-600 transition">
+                <i class="ph-bold ph-sign-out mr-3 text-lg"></i> Logout
+            </button>
+        </form>
+    </div>
+</div>

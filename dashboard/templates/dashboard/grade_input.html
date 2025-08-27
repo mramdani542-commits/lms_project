@@ -1,0 +1,77 @@
+{% extends 'dashboard/layouts/base.html' %}
+{% load custom_filters %} {# Kita perlu membuat custom filter ini #}
+
+{% block title %}Pengolahan Nilai: {{ MataPelajaran.name }} - {{ class_group.name }}{% endblock %}
+{% block page_title %}Pengolahan Nilai: {{ MataPelajaran.name }} - {{ class_group.name }}{% endblock %}
+
+{% block content %}
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="p-4 mb-6 rounded-md bg-green-100 text-green-700">
+            {{ message|safe }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+<div class="bg-white p-6 rounded-lg shadow-md">
+    {% if not competencies %}
+        <div class="text-center py-10 text-gray-500">
+            <p class="mb-2">Belum ada Capaian Kompetensi yang diatur untuk mata pelajaran ini.</p>
+            <a href="{% url 'competency_settings' MataPelajaran.pk %}" class="text-blue-600 hover:underline font-semibold">
+                Klik di sini untuk mengatur kompetensi terlebih dahulu.
+            </a>
+        </div>
+    {% elif not students %}
+        <p class="text-center py-10 text-gray-500">Belum ada siswa di kelas ini.</p>
+    {% else %}
+    <form method="POST">
+        {% csrf_token %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white border">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th rowspan="2" class="p-3 text-left text-sm font-semibold tracking-wide border sticky left-0 bg-gray-50 z-10">Siswa</th>
+                        {% for competency in competencies %}
+                            <th colspan="2" class="p-3 text-center text-sm font-semibold tracking-wide border" title="{{ competency.description }}">
+                                {{ competency.code }}
+                            </th>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        {% for competency in competencies %}
+                            <th class="p-2 text-center text-xs font-medium tracking-wide border bg-gray-100">Formatif</th>
+                            <th class="p-2 text-center text-xs font-medium tracking-wide border bg-gray-100">Sumatif</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for student in students %}
+                    <tr>
+                        <td class="p-2 whitespace-nowrap border font-medium sticky left-0 bg-white">{{ student.get_full_name }}</td>
+                        {% for competency in competencies %}
+                            {% with formative_value=scores_data|get_item:student.id|get_item:competency.id|get_item:'FORMATIF'|default_if_none:'' %}
+                            {% with summative_value=scores_data|get_item:student.id|get_item:competency.id|get_item:'SUMATIF'|default_if_none:'' %}
+                            <td class="border p-1">
+                                <input type="number" name="score_{{ student.pk }}_{{ competency.pk }}_FORMATIF" value="{{ formative_value }}" class="w-20 text-center border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" min="0" max="100">
+                            </td>
+                            <td class="border p-1">
+                                <input type="number" name="score_{{ student.pk }}_{{ competency.pk }}_SUMATIF" value="{{ summative_value }}" class="w-20 text-center border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" min="0" max="100">
+                            </td>
+                            {% endwith %}
+                            {% endwith %}
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="flex justify-end mt-6">
+            <button type="submit" class="bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700">
+                Simpan Semua Nilai
+            </button>
+        </div>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}

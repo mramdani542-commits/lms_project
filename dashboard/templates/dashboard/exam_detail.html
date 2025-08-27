@@ -1,0 +1,152 @@
+{% extends 'dashboard/layouts/base.html' %}
+{% load static %}
+
+{% block title %}Detail Ujian: {{ exam.name }}{% endblock %}
+{% block page_title %}Detail Ujian: {{ exam.name }}{% endblock %}
+
+{% block content %}
+<div class="bg-white p-6 rounded-lg shadow-md">
+    <div class="flex flex-col sm:flex-row justify-between sm:items-center border-b pb-4 mb-6">
+        <div>
+            <a href="{% url 'exam_management' %}" class="text-gray-500 hover:text-blue-600 flex items-center mb-2 sm:mb-0">
+                <i class="ph ph-arrow-left mr-2"></i>Kembali ke Manajemen Ujian
+            </a>
+            <h2 class="text-xl font-bold mt-2">{{ exam.name }}</h2>
+            <p class="text-sm text-gray-500">{{ exam.MataPelajaran.nama }} - {{ exam.class_group.name }}</p>
+        </div>
+        <div class="flex space-x-2 mt-4 sm:mt-0">
+            <button onclick="document.getElementById('import-word-modal').classList.remove('hidden')" class="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700">
+                <i class="ph ph-file-word mr-1"></i> Import Soal
+            </button>
+            <a href="{% url 'question_create' exam.pk %}" class="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700">
+                <i class="ph ph-plus-circle mr-1"></i> Buat Soal Baru
+            </a>
+            <a href="{% url 'item_analysis' exam.pk %}" class="bg-teal-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-teal-600 flex items-center">
+            <i class="ph ph-chart-bar mr-1"></i> Lihat Analisis
+            </a>
+            <a href="{% url 'exam_preview' exam.pk %}" target="_blank" class="bg-purple-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-purple-700 flex items-center">
+                <i class="ph ph-eye mr-1"></i> Preview Ujian
+            </a>
+        </div>
+    </div>
+    <div class="my-8 p-6 border rounded-lg bg-gray-50">
+        <h3 class="text-lg font-semibold mb-4">Manajemen Token</h3>
+        
+        <!-- Form untuk Generate Token -->
+        <form method="POST" action="{% url 'exam_detail' exam.pk %}" class="flex items-center gap-4 mb-6 pb-6 border-b">
+            {% csrf_token %}
+            <div>
+                <label for="num_tokens" class="block text-sm font-medium text-gray-700">Jumlah Token</label>
+                <input type="number" name="num_tokens" id="num_tokens" value="1" min="1" max="100" class="mt-1 block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+            </div>
+            <button type="submit" name="generate_tokens" class="self-end bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700">
+                <i class="ph ph-key mr-1"></i> Generate Token
+            </button>
+        </form>
+
+        <!-- Daftar Token yang Ada -->
+        <h4 class="font-semibold mb-3">Daftar Token ({{ tokens.count }})</h4>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            {% for token in tokens %}
+                <div class="p-3 rounded-md text-center font-mono text-lg tracking-widest
+                    {% if token.is_used %}
+                        bg-gray-200 text-gray-500 line-through
+                    {% else %}
+                        bg-blue-100 text-blue-800 font-bold
+                    {% endif %}">
+                    {{ token.token }}
+                </div>
+            {% empty %}
+                <p class="text-gray-500 col-span-full">Belum ada token yang dibuat untuk ujian ini.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <h3 class="text-lg font-semibold mb-4">Daftar Soal dalam Ujian ({{ questions.count }})</h3>
+    <div class="space-y-4">
+        {% for q in questions %}
+        <div class="border border-gray-200 rounded-lg p-5">
+             <div class="flex justify-between items-start mb-3">
+                <div class="flex items-center gap-4">
+                    <p class="font-bold text-gray-800">Soal #{{ forloop.counter }}</p>
+                    
+                    {% if q.question_type == 'PILIHAN_GANDA' %}
+                        <span class="text-xs font-medium bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full">{{ q.get_question_type_display }}</span>
+                    {% elif q.question_type == 'ISIAN_SINGKAT' %}
+                        <span class="text-xs font-medium bg-green-100 text-green-800 px-2.5 py-0.5 rounded-full">{{ q.get_question_type_display }}</span>
+                    {% elif q.question_type == 'BENAR_SALAH' %}
+                        <span class="text-xs font-medium bg-yellow-100 text-yellow-800 px-2.5 py-0.5 rounded-full">{{ q.get_question_type_display }}</span>
+                    {% else %}
+                        <span class="text-xs font-medium bg-gray-100 text-gray-800 px-2.5 py-0.5 rounded-full">{{ q.get_question_type_display }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <a href="{% url 'question_edit' q.pk %}" class="text-gray-500 hover:text-indigo-600" title="Edit Soal"><i class="ph ph-pencil-simple text-xl"></i></a>
+                    <a href="{% url 'question_delete' q.pk %}" class="text-gray-500 hover:text-red-600" title="Hapus Soal"><i class="ph ph-trash text-xl"></i></a>
+                </div>
+            </div>
+
+            <!-- ======================================================= -->
+            <!-- PERBAIKAN DIMULAI DI SINI -->
+            <!-- ======================================================= -->
+
+            <!-- 1. Cek apakah soal punya gambar -->
+            {% if q.question_image %}
+                <!-- 2. Jika ada, tampilkan gambar menggunakan tag <img> -->
+                <img src="{{ q.question_image.url }}" alt="Gambar untuk Soal #{{ forloop.counter }}" class="my-4 max-w-md rounded-lg shadow-sm">
+            {% endif %}
+
+            <!-- Tampilkan teks soal -->
+            <div class="text-gray-700 leading-relaxed prose max-w-none">{{ q.question_text|safe }}</div>
+            
+            <!-- ======================================================= -->
+            <!-- PERBAIKAN SELESAI DI SINI -->
+            <!-- ======================================================= -->
+
+        </div>
+        {% empty %}
+        <div class="text-center py-12 border-2 border-dashed rounded-lg">
+            <h3 class="text-lg font-semibold text-gray-600">Ujian Ini Masih Kosong</h3>
+            <p class="text-gray-500">Gunakan tombol "Buat Soal Baru" atau "Import Soal" untuk memulai.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Modal untuk import soal (tidak ada perubahan di sini) -->
+<div id="import-word-modal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden">
+    <div class="relative bg-white rounded-lg shadow-xl w-full max-w-lg mx-auto p-6">
+        <div class="flex justify-between items-center pb-3 border-b">
+            <h3 class="text-xl font-semibold text-gray-800">Import Soal untuk <span class="text-blue-600">{{ exam.name }}</span></h3>
+            <button onclick="document.getElementById('import-word-modal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600"><i class="ph-bold ph-x text-2xl"></i></button>
+        </div>
+        <div class="mt-5">
+            <form action="{% url 'question_import_word' exam.pk %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="mb-6">
+                    <h4 class="font-semibold text-gray-800 mb-2">Langkah 1: Download Template</h4>
+                    <p class="text-sm text-gray-600 mb-3">
+                        Unduh template resmi untuk memastikan soal Anda dapat diimpor tanpa error.
+                    </p>
+                    <a href="{% static 'templates/template_soal.docx' %}" download
+                       class="inline-flex items-center justify-center w-full text-center bg-green-500 text-white py-2 px-4 rounded-md text-sm hover:bg-green-600">
+                       <i class="ph ph-download-simple mr-2"></i>
+                       Unduh Template Soal (.docx)
+                    </a>
+                </div>
+                <hr class="my-4">
+                <div>
+                    <h4 class="font-semibold text-gray-800 mb-2">Langkah 2: Unggah File</h4>
+                    <p class="text-sm text-gray-600 mb-4">Pilih file Word (.docx) yang sudah Anda isi.</p>
+                    <input type="file" name="word_file" required accept=".docx" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer mb-5"/>
+                </div>
+                <div class="mt-6 flex flex-col sm:flex-row-reverse gap-3">
+                    <button type="submit" class="w-full sm:w-auto inline-flex justify-center rounded-md shadow-sm px-6 py-2 bg-blue-600 font-medium text-white hover:bg-blue-700">Upload dan Import</button>
+                    <button type="button" onclick="document.getElementById('import-word-modal').classList.add('hidden')" class="w-full sm:w-auto inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-6 py-2 bg-white font-medium text-gray-700 hover:bg-gray-50">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

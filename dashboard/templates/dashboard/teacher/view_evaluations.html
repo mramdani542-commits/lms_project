@@ -1,0 +1,24 @@
+{% extends 'dashboard/layouts/base.html' %}
+
+{% block title %}Evaluasi Kinerja Saya{% endblock %}
+{% block page_title %}Evaluasi Kinerja Saya{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-xl font-semibold mb-4">Riwayat Evaluasi</h2>
+        <div class="space-y-4">
+            {% for evaluation in evaluations %}
+            <div class="border rounded-md p-4 bg-gray-50">
+                <p class="text-sm text-gray-800">{{ evaluation.content|linebreaks }}</p>
+                <p class="text-xs text-gray-500 mt-2 text-right">
+                    Oleh: <strong>{{ evaluation.evaluator.get_full_name|default:"N/A" }}</strong> - {{ evaluation.created_at|date:"d F Y, H:i" }}
+                </p>
+            </div>
+            {% empty %}
+            <p class="text-sm text-gray-500">Anda belum memiliki evaluasi kinerja.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

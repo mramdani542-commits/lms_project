@@ -1,0 +1,157 @@
+{% extends 'dashboard/layouts/base.html' %}
+{% load static %}
+
+{% block title %}Pengaturan Kompetensi - {{ MataPelajaran.name }}{% endblock %}
+{% block page_title %}Pengaturan Kompetensi: {{ MataPelajaran.name }}{% endblock %}
+
+{% block content %}
+<form method="post" id="competency-form">
+    {% csrf_token %}
+    <div class="bg-white p-6 rounded-lg shadow-md space-y-6">
+
+        <!-- Bagian 1: Form Capaian Kompetensi Utama -->
+        <div>
+            <h2 class="text-xl font-semibold mb-4 border-b pb-2">Detail Capaian Kompetensi</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="{{ form.code.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Kode Capaian Kompetensi</label>
+                    {{ form.code }}
+                    <p class="text-xs text-gray-500 mt-1">Contoh: TP 1.1 atau BAB 1</p>
+                </div>
+                <div>
+                    <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi Capaian Kompetensi</label>
+                    {{ form.description }}
+                     <p class="text-xs text-gray-500 mt-1">Contoh: Memahami konsep dasar aljabar</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bagian 2: Formset untuk Komponen Penilaian -->
+        <div>
+            <h2 class="text-xl font-semibold mb-4 border-b pb-2">Komponen Penilaian</h2>
+            
+            <!-- Ini wajib ada untuk formset -->
+            {{ formset.management_form }}
+
+            <div id="component-forms-container" class="space-y-4">
+                {% for component_form in formset %}
+                <div class="component-form p-4 border border-gray-200 rounded-lg bg-gray-50 relative">
+                    <!-- Tombol Hapus di pojok kanan atas -->
+                    <button type="button" class="absolute top-2 right-2 text-red-500 hover:text-red-700 remove-form-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+
+                    <!-- Hidden field untuk ID dan DELETE -->
+                    {{ component_form.id }}
+                    <div class="hidden">{{ component_form.DELETE }}</div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
+                        <div class="md:col-span-4">
+                            <label for="{{ component_form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Nama Komponen</label>
+                            {{ component_form.name }}
+                            <p class="text-xs text-gray-500 mt-1">Cth: Formatif, Sumatif</p>
+                        </div>
+                        <div class="md:col-span-6">
+                            <label for="{{ component_form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
+                            {{ component_form.description }}
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="{{ component_form.weight.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Bobot (%)</label>
+                            {{ component_form.weight }}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Template untuk form baru (disembunyikan) -->
+            <div id="empty-form-template" class="hidden">
+                <div class="component-form p-4 border border-gray-200 rounded-lg bg-gray-50 relative">
+                    <button type="button" class="absolute top-2 right-2 text-red-500 hover:text-red-700 remove-form-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                    
+                    {{ formset.empty_form.id }}
+                    <div class="hidden">{{ formset.empty_form.DELETE }}</div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
+                        <div class="md:col-span-4">
+                            <label for="{{ formset.empty_form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Nama Komponen</label>
+                            {{ formset.empty_form.name }}
+                            <p class="text-xs text-gray-500 mt-1">Cth: Formatif, Sumatif</p>
+                        </div>
+                        <div class="md:col-span-6">
+                            <label for="{{ formset.empty_form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
+                            {{ formset.empty_form.description }}
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="{{ formset.empty_form.weight.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Bobot (%)</label>
+                            {{ formset.empty_form.weight }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" id="add-form-button" class="mt-4 text-blue-600 hover:text-blue-800 font-medium text-sm inline-flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+                Tambah Komponen Penilaian
+            </button>
+        </div>
+
+        <!-- Tombol Simpan Utama -->
+        <div class="flex justify-end pt-4 border-t">
+            <button type="submit" class="bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700">
+                Simpan Perubahan
+            </button>
+        </div>
+    </div>
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('component-forms-container');
+    const addButton = document.getElementById('add-form-button');
+    const emptyFormTemplate = document.getElementById('empty-form-template').innerHTML;
+    const totalFormsInput = document.querySelector('#id_assessmentcomponent_set-TOTAL_FORMS');
+
+    // Fungsi untuk menambahkan event listener ke tombol hapus
+    function addDeleteListener(button) {
+        button.addEventListener('click', function() {
+            // Cari parent form terdekat
+            const formToDelete = this.closest('.component-form');
+            // Cari input DELETE di dalamnya dan centang
+            const deleteInput = formToDelete.querySelector('input[id$="-DELETE"]');
+            if (deleteInput) {
+                deleteInput.checked = true;
+                // Sembunyikan form dari tampilan
+                formToDelete.style.display = 'none';
+            }
+        });
+    }
+
+    // Tambah form baru
+    addButton.addEventListener('click', function() {
+        const formIndex = parseInt(totalFormsInput.value);
+        // Ganti '__prefix__' dengan nomor indeks yang baru
+        const newFormHtml = emptyFormTemplate.replace(/__prefix__/g, formIndex);
+        
+        const newFormElement = document.createElement('div');
+        newFormElement.innerHTML = newFormHtml;
+        
+        container.appendChild(newFormElement.firstElementChild);
+        
+        // Update jumlah total form
+        totalFormsInput.value = formIndex + 1;
+
+        // Tambahkan listener ke tombol hapus yang baru dibuat
+        const newDeleteButton = container.lastElementChild.querySelector('.remove-form-button');
+        if (newDeleteButton) {
+            addDeleteListener(newDeleteButton);
+        }
+    });
+
+    // Tambahkan listener ke semua tombol hapus yang sudah ada saat halaman dimuat
+    document.querySelectorAll('.remove-form-button').forEach(addDeleteListener);
+});
+</script>
+{% endblock %}

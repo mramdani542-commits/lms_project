@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview Ujian: {{ exam.name }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Memuat Alpine.js untuk interaktivitas -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        body { background-color: #f0f2f5; }
+        /* Style untuk menyembunyikan elemen yang tidak aktif */
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+    <div 
+        class="max-w-5xl mx-auto"
+        x-data="{
+            questions: [],
+            currentIndex: 0,
+            init() {
+                try {
+                    this.questions = JSON.parse('{{ questions_json|escapejs }}');
+                } catch (e) {
+                    console.error('Gagal mem-parsing data soal JSON:', e);
+                    alert('Terjadi kesalahan saat memuat data soal.');
+                }
+            },
+            get currentQuestion() {
+                return this.questions[this.currentIndex];
+            },
+            goToQuestion(index) {
+                this.currentIndex = index;
+            },
+            nextQuestion() {
+                if (this.currentIndex < this.questions.length - 1) {
+                    this.currentIndex++;
+                }
+            },
+            prevQuestion() {
+                if (this.currentIndex > 0) {
+                    this.currentIndex--;
+                }
+            }
+        }"
+        x-init="init()"
+    >
+        <div class="text-center mb-6 p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 rounded-md">
+            <p class="font-bold">Mode Pratinjau (Preview)</p>
+            <p class="text-sm">Ini adalah tampilan ujian dari sisi siswa. Tombol navigasi dan pilihan jawaban dinonaktifkan.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Kolom Soal -->
+            <div class="md:col-span-2 bg-white p-6 sm:p-8 rounded-lg shadow-lg">
+                <div class="flex justify-between items-center border-b pb-4 mb-6">
+                    <div>
+                        <h1 class="text-xl sm:text-2xl font-bold text-gray-800">{{ exam.name }}</h1>
+                        <p class="text-sm text-gray-500">{{ exam.MataPelajaran.nama }} - {{ exam.class_group.name }}</p>
+                    </div>
+                    <div class="text-center">
+                        <span class="text-xs text-gray-500">Sisa Waktu</span>
+                        <div class="text-xl sm:text-2xl font-bold text-red-500 bg-red-100 px-4 py-1 rounded-lg">
+                            {{ exam.duration }}:00
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Template untuk menampilkan soal yang aktif -->
+                <template x-for="(question, index) in questions" :key="index">
+                    <div x-show="currentIndex === index" x-cloak>
+                        <div class="flex items-start gap-4 mb-4">
+                            <span class="flex-shrink-0 flex items-center justify-center w-8 h-8 bg-blue-600 text-white font-bold rounded-full" x-text="index + 1"></span>
+                            <div class="prose max-w-none text-gray-800" x-html="question.text"></div>
+                        </div>
+                        
+                        <img x-show="question.image_url" :src="question.image_url" class="my-4 max-w-sm rounded-lg shadow">
+
+                        <!-- Tampilan Opsi Jawaban (Contoh untuk Pilihan Ganda) -->
+                        <div class="space-y-3 mt-6" x-show="question.type === 'Pilihan Ganda'">
+                            <template x-for="(option, optIndex) in question.options" :key="optIndex">
+                                <label class="flex items-center p-4 border rounded-lg cursor-not-allowed bg-gray-50">
+                                    <input type="radio" :name="'option_' + index" class="h-4 w-4 text-blue-600 border-gray-300" disabled>
+                                    <span class="ml-3 text-gray-700" x-text="option"></span>
+                                </label>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Tombol Navigasi Bawah -->
+                <div class="flex justify-between mt-10">
+                    <button @click="prevQuestion()" :disabled="currentIndex === 0" class="bg-gray-200 font-bold py-2 px-4 rounded-lg" :class="{ 'opacity-50 cursor-not-allowed': currentIndex === 0 }">Sebelumnya</button>
+                    <button class="bg-yellow-400 text-yellow-900 font-bold py-2 px-4 rounded-lg cursor-not-allowed">Ragu-ragu</button>
+                    <button @click="nextQuestion()" :disabled="currentIndex === questions.length - 1" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg" :class="{ 'opacity-50 cursor-not-allowed': currentIndex === questions.length - 1 }">Selanjutnya</button>
+                </div>
+            </div>
+
+            <!-- Kolom Navigasi Soal -->
+            <div class="md:col-span-1">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="font-bold mb-4">Navigasi Soal</h3>
+                    <div class="grid grid-cols-5 gap-2">
+                        <template x-for="(q, index) in questions" :key="index">
+                            <button 
+                                @click="goToQuestion(index)"
+                                class="h-10 w-10 flex items-center justify-center rounded border font-semibold"
+                                :class="{
+                                    'border-2 border-blue-600 bg-blue-100 text-blue-800': currentIndex === index,
+                                    'bg-gray-50 text-gray-700': currentIndex !== index
+                                }">
+                                <span x-text="index + 1"></span>
+                            </button>
+                        </template>
+                    </div>
+                    <button class="w-full mt-6 bg-green-500 text-white font-bold py-3 rounded-lg opacity-50 cursor-not-allowed">
+                        Selesaikan Ujian
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,78 @@
+{% extends 'dashboard/layouts/base.html' %}
+
+{% block title %}{{ page_title|default:"Manajemen Soal" }}{% endblock %}
+{% block page_title %}{{ page_title|default:"Manajemen Soal" }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto bg-white p-6 md:p-8 rounded-lg shadow-lg">
+    
+    <!-- Header Halaman -->
+    <div class="border-b pb-4 mb-8">
+        {% if page_title %}
+        <h1 class="text-2xl font-bold text-gray-800">{{ page_title }}</h1>
+        {% endif %}
+        {% if exam %}
+        <p class="text-sm text-gray-500 mt-1">
+            Untuk Ujian: <a href="{% url 'exam_detail' exam.pk %}" class="text-indigo-600 hover:underline font-semibold">{{ exam.name }}</a>
+        </p>
+        {% endif %}
+    </div>
+
+   <form method="POST" class="space-y-6" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <!-- Merender setiap field secara manual dengan styling yang lebih baik -->
+        {% for field in form %}
+        <div>
+            <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-800 mb-1">{{ field.label }}</label>
+            
+            <!-- Menambahkan class CSS ke widget field -->
+            {{ field.as_widget.attrs.class }}
+            {% if field.name == 'question_text' %}
+                <!-- Khusus untuk CKEditor atau textarea besar -->
+                {{ field }}
+            {% else %}
+                <!-- Untuk input, select, dan textarea lainnya -->
+                {{ field.as_widget.attrs.update.class }}
+                {{ field }}
+            {% endif %}
+
+            {% if field.help_text %}
+                <p class="mt-2 text-xs text-gray-500">{{ field.help_text|safe }}</p>
+            {% endif %}
+            {% for error in field.errors %}
+                <p class="mt-2 text-xs text-red-600">{{ error }}</p>
+            {% endfor %}
+        </div>
+        {% endfor %}
+
+        <!-- Tombol Aksi -->
+        <div class="flex items-center justify-end space-x-4 pt-5 mt-8 border-t">
+            {% if exam %}
+            <a href="{% url 'exam_detail' exam.pk %}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-md">
+                Batal
+            </a>
+            {% endif %}
+            
+            <button type="submit" class="bg-indigo-600 text-white font-semibold py-2 px-6 rounded-md hover:bg-indigo-700">
+                {% if form.instance.pk %}
+                    Simpan Perubahan
+                {% else %}
+                    Simpan Soal Baru
+                {% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Jika Anda menggunakan CKEditor, tambahkan skrip ini -->
+<script>
+    // Pastikan CKEditor di-render dengan benar jika ada
+    document.addEventListener("DOMContentLoaded", function() {
+        if (typeof CKEDITOR !== 'undefined' && document.getElementById('id_question_text')) {
+            CKEDITOR.replace('id_question_text');
+        }
+    });
+</script>
+
+{% endblock %}
