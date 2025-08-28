@@ -1,0 +1,30 @@
+<!-- dashboard/templates/dashboard/select_class_for_printing.html -->
+{% extends 'dashboard/layouts/base.html' %}
+
+{% block title %}Pilih Kelas untuk Cetak Kartu Ujian{% endblock %}
+{% block page_title %}Pilih Kelas untuk Cetak Kartu Ujian{% endblock %}
+
+{% block content %}
+<div class="bg-white p-6 rounded-lg shadow-md max-w-lg mx-auto">
+    <h2 class="text-xl font-bold mb-4">Pilih Kelas</h2>
+    <p class="text-gray-600 mb-6">Silakan pilih kelas yang kartu ujiannya ingin Anda cetak.</p>
+    
+    <form method="POST">
+        {% csrf_token %}
+        <div class="mb-4">
+            <label for="class_group" class="block text-sm font-medium text-gray-700">Kelas</label>
+            <select name="class_group" id="class_group" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                {% for group in class_groups %}
+                    <option value="{{ group.pk }}">{{ group.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="mt-6">
+            <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700">
+                Lanjutkan
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

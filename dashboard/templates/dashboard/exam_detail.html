@@ -48,14 +48,13 @@
         <h4 class="font-semibold mb-3">Daftar Token ({{ tokens.count }})</h4>
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
             {% for token in tokens %}
-                <div class="p-3 rounded-md text-center font-mono text-lg tracking-widest
-                    {% if token.is_used %}
-                        bg-gray-200 text-gray-500 line-through
-                    {% else %}
-                        bg-blue-100 text-blue-800 font-bold
-                    {% endif %}">
+                <!-- ======================================================= -->
+                <!-- PERBAIKAN DI SINI -->
+                <!-- ======================================================= -->
+                <div class="p-3 rounded-md text-center font-mono text-lg tracking-widest bg-blue-100 text-blue-800 font-bold">
                     {{ token.token }}
                 </div>
+                <!-- ======================================================= -->
             {% empty %}
                 <p class="text-gray-500 col-span-full">Belum ada token yang dibuat untuk ujian ini.</p>
             {% endfor %}
@@ -87,23 +86,11 @@
                 </div>
             </div>
 
-            <!-- ======================================================= -->
-            <!-- PERBAIKAN DIMULAI DI SINI -->
-            <!-- ======================================================= -->
-
-            <!-- 1. Cek apakah soal punya gambar -->
             {% if q.question_image %}
-                <!-- 2. Jika ada, tampilkan gambar menggunakan tag <img> -->
                 <img src="{{ q.question_image.url }}" alt="Gambar untuk Soal #{{ forloop.counter }}" class="my-4 max-w-md rounded-lg shadow-sm">
             {% endif %}
 
-            <!-- Tampilkan teks soal -->
             <div class="text-gray-700 leading-relaxed prose max-w-none">{{ q.question_text|safe }}</div>
-            
-            <!-- ======================================================= -->
-            <!-- PERBAIKAN SELESAI DI SINI -->
-            <!-- ======================================================= -->
-
         </div>
         {% empty %}
         <div class="text-center py-12 border-2 border-dashed rounded-lg">

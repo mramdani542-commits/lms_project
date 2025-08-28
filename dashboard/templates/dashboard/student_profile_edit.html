@@ -1,0 +1,37 @@
+{% extends 'dashboard/layouts/base.html' %}
+
+{% block title %}Edit Profil Siswa{% endblock %}
+{% block page_title %}Edit Profil {{ student.get_full_name|default:student.username }}{% endblock %}
+
+{% block content %}
+<div class="bg-white p-6 rounded-lg shadow-md max-w-2xl mx-auto">
+    <form method="POST" enctype="multipart/form-data" class="space-y-4">
+        {% csrf_token %}
+        
+        {% for field in form %}
+        <div>
+            <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ field.label }}</label>
+            
+            {% if field.name == 'profile_picture' and student.profile_picture %}
+                <div class="my-2">
+                    <img src="{{ student.profile_picture.url }}" alt="Foto Profil Saat Ini" class="h-24 w-24 rounded-full object-cover">
+                    <p class="text-xs text-gray-500 mt-1">Foto saat ini. Unggah file baru untuk menggantinya.</p>
+                </div>
+            {% endif %}
+
+            {{ field }}
+            
+            {% for error in field.errors %}
+                <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+            {% endfor %}
+        </div>
+        {% endfor %}
+
+        <div class="pt-4">
+            <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700">
+                Simpan Perubahan
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

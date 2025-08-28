@@ -114,7 +114,7 @@ class ClassGroup(models.Model):
     )
     # Relasi Many-to-Many ke MataPelajaran tetap dipertahankan
     mata_pelajaran = models.ManyToManyField("MataPelajaran", blank=True)
-
+    exam_room = models.CharField(max_length=50, blank=True, null=True, verbose_name="Ruang Ujian")
     def __str__(self):
         # Menggunakan get_level_display() untuk menampilkan label yang mudah dibaca
         return f"{self.name} ({self.get_level_display()})"
@@ -403,9 +403,6 @@ class Token(models.Model):
     """
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name='token_set')
     token = models.CharField(max_length=50, unique=True, db_index=True)
-    is_used = models.BooleanField(default=False)
-    used_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='used_tokens')
-    used_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

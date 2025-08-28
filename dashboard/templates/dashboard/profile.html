@@ -46,10 +46,30 @@
             <!-- Asumsi Anda punya form bernama 'profile_form' dari view -->
             <form method="POST" enctype="multipart/form-data" class="space-y-4">
                 {% csrf_token %}
-                <!-- Contoh render form -->
-                {{ profile_form.as_p }}
-                <button type="submit" name="update_profile" class="bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700">Simpan Perubahan</button>
-            </form>
+                {% if user.role == "SISWA" %}
+        <!-- Render form tanpa field foto -->
+                {{ profile_form.non_field_errors }}
+                 {% for field in profile_form %}
+                {% if field.name != "profile_picture" %}
+                <div class="space-y-2">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {{ field.errors }}
+                </div>
+                 {% endif %}
+                 {% endfor %}
+                 <p class="text-sm text-gray-500 italic">
+                 Siswa tidak diperbolehkan mengganti foto profil.
+                 </p>
+                 {% else %}
+                 <!-- Untuk admin, guru, wali kelas, manager: form lengkap -->
+                 {{ profile_form.as_p }}
+                 {% endif %}
+
+                <button type="submit" name="update_profile" class="bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700">
+                 Simpan Perubahan
+                 </button>
+             </form>
         </div>
 
         <!-- Form Ganti Password -->

@@ -1,0 +1,110 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cetak Kartu Ujian - {{ class_group.name }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Arial:wght@700&family=Times+New+Roman&display=swap');
+        
+        @media print {
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .no-print {
+                display: none;
+            }
+        }
+        .card {
+            width: 10.0cm; 
+            height: 7.0cm;
+            box-sizing: border-box;
+            page-break-inside: avoid;
+            font-family: 'Times New Roman', serif;
+        }
+        .header-text {
+            font-family: 'Arial', sans-serif;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-8">
+        <div class="no-print mb-8 text-center">
+            <h1 class="text-2xl font-bold">Kartu Ujian Kelas {{ class_group.name }}</h1>
+            <p class="text-gray-600">Gunakan Ctrl+P atau Cmd+P untuk mencetak halaman ini.</p>
+            <button onclick="window.print()" class="mt-4 bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-700">
+                Cetak Halaman
+            </button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            {% for student in students %}
+            <div class="card bg-white p-2 rounded-lg shadow-md border border-black flex flex-col">
+                <!-- Header Kartu -->
+                <div class="text-center border-b-2 border-black pb-1">
+                    <div class="flex items-center justify-center">
+                        <img src="{% static 'images/Logo.png' %}" alt="Logo Sekolah" class="h-8 w-8 mr-2">
+                        <div class="text-xs header-text leading-tight">
+                            <p>KARTU PESERTA STS</p>
+                            <p>SEKOLAH GENIUS</p>
+                            <p>TAHUN AJARAN 2024/2025</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Konten Utama -->
+                <div class="flex-grow flex flex-col justify-between mt-2 text-xs">
+                    <!-- Detail Siswa -->
+                    <div>
+                        <table class="w-full">
+                            <tbody>
+                                <tr>
+                                    <td class="pb-1 w-1/4">Nama</td>
+                                    <td class="pb-1">: {{ student.get_full_name|default:student.username }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="pb-1">Username/Pass</td>
+                                    <td class="pb-1 font-mono">: {{ student.username }}/{{ student.username }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="pb-1">Kelas</td>
+                                    <td class="pb-1">: {{ class_group.name }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="pb-1">Ruang</td>
+                                    <td class="pb-1">: (Ruang Ujian)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Bagian Bawah: Foto & Tanda Tangan -->
+                    <div class="flex items-end justify-between">
+                        <!-- Foto Siswa -->
+                        <div class="w-1/4 flex flex-col items-center">
+                            <div class="w-16 h-20 border-2 border-black flex items-center justify-center">
+                                <!-- Jika Anda punya field foto siswa, gunakan di sini -->
+                                <!-- <img src="{{ student.profile_picture.url }}" class="w-full h-full object-cover"> -->
+                                <span class="text-xs text-gray-500">Foto</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Tanda Tangan -->
+                        <div class="w-3/4 text-center text-xs">
+                            <p>Tangerang, 23 September 2024</p>
+                            <p>Kepala Sekolah GenIUS,</p>
+                            <div class="h-8"></div> <!-- Spasi untuk tanda tangan -->
+                            <p class="font-bold underline">Ria Stefani, S.Psi., M.Psi.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

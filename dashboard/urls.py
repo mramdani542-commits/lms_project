@@ -88,11 +88,15 @@ urlpatterns = [
     # URL UNTUK SISWA (menggunakan student_views)
     # =========================================================
     # PERBAIKAN DI SINI: Arahkan ke student_views
-    path('exam/<int:pk>/start/', student_views.exam_start_view, name='exam_start'),
+     path('exam/attempt/<int:attempt_pk>/start/', views.exam_start_page_view, name='exam_start_page'),
     path('exam/<int:pk>/gate/', student_views.exam_token_gate_view, name='exam_token_gate'),
     path('exam/<int:pk>/take/', student_views.take_exam_view, name='take_exam'),
     path('exam/<int:pk>/submit/', student_views.exam_submit_view, name='exam_submit'),
-    path('exam/<int:exam_pk>/resume/', views.resume_exam_with_token, name='resume_exam_with_token'),
+    # URL untuk API menyimpan progress
+    path('exam/attempt/<int:attempt_pk>/save/', views.save_exam_progress, name='save_exam_progress'),
+    
+    # URL untuk API submit jawaban
+    path('exam/attempt/<int:attempt_pk>/submit/', views.submit_exam_view, name='submit_exam'),
     path('exam/attempt/<int:attempt_pk>/save/', student_views.save_exam_progress, name='save_exam_progress'),
 
      # URL untuk form membuat soal baru UNTUK UJIAN SPESIFIK
@@ -207,6 +211,11 @@ urlpatterns = [
     path('grade-report/', views.grade_report_view, name='grade_report'),
     # URL BARU UNTUK MELIHAT DAFTAR SISWA DI SEBUAH KELAS
     path('class/<int:class_id>/students/', views.class_student_list_view, name='class_student_list'),
+    # ... (URL Anda yang sudah ada)
+    path('class/<int:class_pk>/print_cards/', views.print_exam_cards_view, name='print_exam_cards'),
+    path('print-cards/select-class/', views.select_class_for_printing_view, name='select_class_for_printing'),
+     # ... (URL Anda yang lain)
+    path('student/<int:student_pk>/edit/', views.student_profile_edit_view, name='student_profile_edit'),
 ] 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -118,11 +118,14 @@
                             </div>
                             
                             <div class="mt-4 pt-3 border-t flex justify-between items-center">
+                                {% if request.user.role != 'SISWA' %}
                                 <a href="{% url 'class_student_list' exam.class_group.pk %}" class="text-sm font-semibold text-gray-600 hover:text-indigo-600 hover:underline" title="Lihat Daftar Peserta Kelas">
                                 <i class="ph ph-users"></i>
-                                 <!-- Asumsi: Anda sudah menghitung jumlah ini di view -->
                                  {{ exam.completed_attempts_count }} / {{ exam.total_students_in_class_count }} Selesai
                                  </a>
+                                {% else %}
+                                <div></div> <!-- Sisakan div kosong agar layout tidak berantakan -->
+                                {% endif %}
                                 <div class="flex space-x-2">
                                     {% if request.user.role == 'SISWA' %}
                                         {% get_exam_status exam as status %}

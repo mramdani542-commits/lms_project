@@ -1,51 +1,64 @@
-{% extends 'dashboard/layouts/base.html' %}
-{% load static %}
+<!-- dashboard/templates/dashboard/exam_token_gate.html -->
+{% extends 'dashboard/layouts/base_fullscreen.html' %}
+{% block title %}{{ page_title|default:'Mulai Ujian' }}{% endblock %}
 
-{% block title %}{{ page_title|default:"Masukkan Token Ujian" }}{% endblock %}
-{% block page_title %}Konfirmasi Ujian{% endblock %}
+{% block body_content %}
+<div class="flex flex-col items-center justify-center min-h-screen bg-gray-50 text-center p-4">
 
-{% block content %}
-<div class="max-w-lg mx-auto bg-white p-8 rounded-lg shadow-md text-center">
-    
-    <!-- JUDUL YANG DINAMIS -->
-    <h1 class="text-2xl font-bold mb-2">{{ page_heading|default:"Anda akan memulai ujian:" }}</h1>
-    <p class="text-lg text-indigo-600 font-semibold mb-6">{{ exam.name }}</p>
+    {% if show_prepare_page %}
+        <!-- TAMPILAN PERSIAPAN UJIAN (SETELAH TOKEN BENAR) -->
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Persiapan Ujian</h1>
+        <p class="text-gray-600 max-w-md mb-8">
+            Ujian akan ditampilkan dalam mode layar penuh (fullscreen) untuk menjaga fokus. Pastikan Anda siap dan tidak keluar dari mode ini selama ujian berlangsung.
+        </p>
+        <form method="POST">
+            {% csrf_token %}
+            <!-- Hidden input untuk menandai ini adalah aksi 'start_exam' -->
+            <input type="hidden" name="action" value="start_exam">
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition duration-300">
+                Mulai Ujian Sekarang
+            </button>
+        </form>
 
-    <!-- SUB-JUDUL YANG DINAMIS -->
-    <p class="text-gray-600 mb-4">{{ page_subheading|default:"Silakan masukkan token yang diberikan oleh guru Anda untuk memulai ujian." }}</p>
+    {% else %}
+        <!-- TAMPILAN INPUT TOKEN (AWAL) -->
+        <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg">
+            <div class="text-center">
+                <h1 class="text-2xl font-bold text-gray-900">{{ page_heading }}</h1>
+                <p class="mt-2 text-sm text-gray-600">{{ exam.name }}</p>
+                <p class="mt-4 text-sm text-gray-500">{{ page_subheading }}</p>
+            </div>
 
-    {% if messages %}
-        {% for message in messages %}
-        <div class="p-3 mb-4 rounded-md text-sm {% if message.tags == 'error' %}bg-red-100 text-red-800{% else %}bg-blue-100 text-blue-800{% endif %}">
-            {{ message }}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="p-4 mb-4 text-sm rounded-lg 
+                    {% if message.tags == 'error' %} bg-red-100 text-red-700 {% endif %}
+                    {% if message.tags == 'success' %} bg-green-100 text-green-700 {% endif %}"
+                    role="alert">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            <form class="mt-8 space-y-6" method="POST">
+                {% csrf_token %}
+                <!-- Hidden input untuk menandai ini adalah aksi 'validate_token' -->
+                <input type="hidden" name="action" value="validate_token">
+                <div>
+                    <label for="token-input" class="sr-only">Token Ujian</label>
+                    <input id="token-input" name="token" type="text" required
+                        class="appearance-none rounded-md relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-center text-lg tracking-widest"
+                        placeholder="MASUKKAN TOKEN" autocomplete="off" style="text-transform:uppercase">
+                </div>
+                <div>
+                    <button type="submit"
+                        class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        {{ button_text }}
+                    </button>
+                </div>
+            </form>
         </div>
-        {% endfor %}
     {% endif %}
-
-    <!-- FORM ACTION YANG DINAMIS -->
-    <form method="POST" action="{% url 'exam_start' exam.pk %}">
-        {% csrf_token %}
-        <div class="mb-4">
-            <label for="token" class="sr-only">Token Ujian</label>
-            <input 
-                type="text" 
-                name="token" 
-                id="token"
-                required
-                class="w-full text-center text-2xl font-mono tracking-widest p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                placeholder="XXXXXX"
-                maxlength="8"
-                style="text-transform:uppercase"
-            >
-        </div>
-        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-md hover:bg-blue-700 transition-colors">
-            {{ button_text|default:"Mulai Kerjakan" }}
-        </button>
-    </form>
-
-    <div class="mt-6">
-        <a href="{% url 'exam_management' %}" class="text-sm text-gray-500 hover:underline">Kembali ke Daftar Ujian</a>
-    </div>
 
 </div>
 {% endblock %}

@@ -20,18 +20,15 @@
 </script>
 <!-- Menyimpan data dari Django di sini -->
 <div id="exam-data-container"
-     data-time-left="{{ time_left|default:'null' }}"
-     data-attempt-pk="{{ attempt_pk }}"
+     data-time-left="{{ time_left }}"
+     data-attempt-pk="{{ attempt.pk }}"
      class="hidden">
-    <script id="exam-questions-json" type="application/json">
-        {{ questions_json|safe|default:"[]" }}
-    </script>
-    <script id="saved-answers-json" type="application/json">
-        {{ saved_answers_json|safe|default:"{}" }}
-    </script>
+    {% csrf_token %}
+    <script id="exam-questions-json" type="application/json">{{ questions_json|safe }}</script>
+    <script id="saved-answers-json" type="application/json">{{ saved_answers_json|safe }}</script>
 </div>
 
-<!-- Gerbang Fullscreen -->
+<!-- Gerbang Fullscreen (Akan dikontrol oleh JS) -->
 <div id="fullscreen-gate" class="fixed inset-0 bg-gray-100 z-50 flex items-center justify-center text-center p-4">
     <div class="max-w-md">
         <h1 class="text-3xl font-bold text-gray-800 mb-4">Persiapan Ujian</h1>
@@ -46,7 +43,6 @@
 <div id="exam-container" class="hidden flex items-center justify-center min-h-screen w-full bg-gray-100 p-4">
     <div class="container mx-auto max-w-6xl w-full">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
             <!-- Kolom Kiri: Soal dan Pilihan Jawaban -->
             <div class="lg:col-span-2 bg-white p-6 md:p-8 rounded-2xl shadow-lg">
                 <!-- Header Soal -->
@@ -62,34 +58,25 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- Konten Soal -->
-                <div id="question-area" class="min-h-[400px]">
-                    <!-- Soal akan dimuat di sini oleh JavaScript -->
-                </div>
-
+                <div id="question-area" class="min-h-[400px]"></div>
                 <!-- Tombol Navigasi Bawah -->
                 <div class="mt-8 pt-6 border-t flex justify-between items-center">
                     <button id="prev-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg transition duration-300 flex items-center disabled:opacity-50 disabled:cursor-not-allowed">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
                         Sebelumnya
                     </button>
-                    <button id="mark-review-btn" class="bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold py-3 px-6 rounded-lg transition duration-300 flex items-center">
-                        <!-- Konten tombol Ragu-ragu akan diubah oleh JS -->
-                    </button>
+                    <button id="mark-review-btn" class="bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold py-3 px-6 rounded-lg transition duration-300 flex items-center"></button>
                     <button id="next-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition duration-300 flex items-center disabled:opacity-50 disabled:cursor-not-allowed">
                         Selanjutnya
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
                     </button>
                 </div>
             </div>
-
             <!-- Kolom Kanan: Navigasi Soal -->
             <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg self-start sticky top-8">
                 <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-3">Navigasi Soal</h2>
-                <div id="question-nav-grid" class="grid grid-cols-5 gap-3">
-                    <!-- Nomor soal akan dimuat di sini -->
-                </div>
+                <div id="question-nav-grid" class="grid grid-cols-5 gap-3"></div>
                 <div class="mt-6">
                     <button id="finish-btn" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg transition duration-300">
                         Selesaikan Ujian
@@ -110,61 +97,25 @@
     <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6 text-center text-gray-800">
         <h2 id="alert-title" class="text-xl font-bold mb-2"></h2>
         <p id="alert-message" class="text-gray-600 mb-6"></p>
-        <div id="alert-buttons" class="flex justify-center gap-4">
-            <!-- Tombol akan dimasukkan di sini oleh JavaScript -->
-        </div>
+        <div id="alert-buttons" class="flex justify-center gap-4"></div>
     </div>
 </div>
 
-<!-- Form tersembunyi untuk pengumpulan jawaban -->
-<form id="exam-form" method="POST" action="{% url 'exam_submit' exam.pk %}" class="hidden">
-    {% csrf_token %}
-    <div id="answers-container"></div>
-</form>
-
 <style>
-    body {
-        font-family: 'Inter', sans-serif;
-    }
-    .active-question-nav {
-        border: 3px solid #3b82f6;
-        font-weight: 700;
-        color: #3b82f6;
-    }
-    .doubtful-question-nav {
-        background-color: #facc15;
-        color: #422006;
-        border-color: #facc15;
-    }
-    .answered-question-nav {
-        background-color: #22c55e;
-        color: white;
-        border-color: #22c55e;
-    }
-    /* Tambahan style untuk gambar soal */
-    .question-image-container img {
-        max-width: 100%;
-        max-height: 400px; /* Batasi tinggi gambar agar tidak terlalu besar */
-        height: auto;
-        border-radius: 0.5rem;
-        margin-top: 1rem;
-        margin-bottom: 1rem;
-        border: 1px solid #e5e7eb;
-        object-fit: contain; /* Pastikan gambar tidak terdistorsi */
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-    }
+    body { font-family: 'Inter', sans-serif; }
+    .active-question-nav { border: 3px solid #3b82f6; font-weight: 700; color: #3b82f6; }
+    .doubtful-question-nav { background-color: #facc15; color: #422006; border-color: #facc15; }
+    .answered-question-nav { background-color: #22c55e; color: white; border-color: #22c55e; }
+    .question-image-container img { max-width: 100%; max-height: 400px; height: auto; border-radius: 0.5rem; margin-top: 1rem; margin-bottom: 1rem; border: 1px solid #e5e7eb; object-fit: contain; display: block; margin-left: auto; margin-right: auto; }
 </style>
 {% endblock %}
 
 {% block extra_script %}
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // --- ELEMEN PENTING ---
-    const elements = {
+     const elements = {
         examContainer: document.getElementById('exam-container'),
         gate: document.getElementById('fullscreen-gate'),
         startBtn: document.getElementById('start-exam-btn'),
@@ -182,47 +133,40 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     // --- DATA DARI DJANGO ---
-    const dataContainer = document.getElementById('exam-data-container');
-    const examPk = '{{ exam.pk }}';
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    const examDurationMinutes = parseInt(dataContainer.dataset.durationMinutes, 10) || 0;
-    const initialTimeLeftStr = dataContainer.dataset.timeLeft;
-    const initialTimeLeft = initialTimeLeftStr !== 'null' ? parseFloat(initialTimeLeftStr) : null;
-    
-    let questions = [];
+    let questions, savedAnswers, attemptPk, csrfToken, initialTimeLeft;
     try {
-        const questionsDataEl = document.getElementById('exam-questions-json');
-        if (questionsDataEl && questionsDataEl.textContent.trim()) {
-            questions = JSON.parse(questionsDataEl.textContent);
-        } else { throw new Error("Elemen #exam-questions-json kosong."); }
-    } catch (e) {
-        console.error("Gagal mem-parsing data soal JSON:", e);
-        showAlert('Error Kritis', 'Tidak dapat memuat data soal.', [{ text: 'Kembali', action: () => window.history.back() }]);
+        const dataContainer = document.getElementById('exam-data-container');
+        attemptPk = dataContainer.dataset.attemptPk;
+        csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        initialTimeLeft = parseFloat(dataContainer.dataset.timeLeft);
+        questions = JSON.parse(document.getElementById('exam-questions-json').textContent);
+        savedAnswers = JSON.parse(document.getElementById('saved-answers-json').textContent);
+    } catch (error) {
+        console.error("CRITICAL ERROR: Gagal mem-parsing data dari Django.", error);
+        showAlert('Error Kritis', 'Gagal memuat data ujian. Silakan hubungi administrator.', []);
         return;
     }
-
+    
     // --- STATE UJIAN ---
     let state = {
         currentQuestionIndex: 0,
         timeLeft: initialTimeLeft,
         timerInterval: null,
-        // --- PERUBAHAN: Inisialisasi jawaban dari data tersimpan ---
         studentAnswers: questions.map(q => {
             const saved = savedAnswers[q.pk];
             return {
                 pk: q.pk,
                 answer: saved ? saved.answer : null,
                 isMarked: saved ? saved.is_marked : false,
-                isAnswered: !!(saved && saved.answer),
+                isAnswered: !!(saved && saved.answer !== null && saved.answer !== ''),
             };
         }),
-        isExamActive: false
+        isExamActive: false,
+        saveInterval: null
     };
-    // --- FUNGSI BARU UNTUK MENYIMPAN PROGRESS ---
-    let saveInterval = null;
+
     async function saveProgress() {
         if (!state.isExamActive || !attemptPk) return;
-
         const answersForBackend = {};
         state.studentAnswers.forEach(ans => {
             if (ans.isAnswered || ans.isMarked) {
@@ -233,48 +177,96 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             await fetch(`/exam/attempt/${attemptPk}/save/`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
                 body: JSON.stringify({ answers: answersForBackend })
             });
-            console.log('Progress saved at', new Date().toLocaleTimeString());
-        } catch (error) {
-            console.error('Failed to save progress:', error);
-        }
+        } catch (error) { console.error('Gagal menyimpan progress:', error); }
     }
 
-    // --- FUNGSI UTAMA ---
     function init() {
-        if (questions.length === 0) {
-            showAlert('Error', 'Tidak ada soal untuk ujian ini.', [{ text: 'Kembali', action: () => window.history.back() }]);
+        if (!questions || questions.length === 0) {
+            showAlert('Error', 'Tidak ada soal untuk ujian ini.', [{ text: 'Kembali', action: () => window.history.back(), class: 'bg-red-500 text-white font-bold py-2 px-6 rounded-lg' }]);
             return;
         }
+        
         elements.startBtn.addEventListener('click', startExam);
+        
+        elements.prevBtn.addEventListener('click', () => navigateQuestion(state.currentQuestionIndex - 1));
+        elements.nextBtn.addEventListener('click', () => navigateQuestion(state.currentQuestionIndex + 1));
+        elements.markBtn.addEventListener('click', handleMarkReview);
+        elements.finishBtn.addEventListener('click', handleFinishExam);
+        updateTimerDisplay();
+    }
+
+    async function submitExam() {
+        if (!state.isExamActive) return;
+        state.isExamActive = false;
+        clearInterval(state.timerInterval);
+        clearInterval(state.saveInterval);
+        await saveProgress();
+        removeAntiCheat();
+        hideAlert();
+
+        const answersForBackend = {};
+        state.studentAnswers.forEach(ans => {
+            if (ans.isAnswered || ans.isMarked) {
+                answersForBackend[ans.pk] = { answer: ans.answer, is_marked: ans.isMarked };
+            }
+        });
+        
+        elements.finishBtn.disabled = true;
+        elements.finishBtn.textContent = 'Mengirim...';
+
+        try {
+            const response = await fetch(`/exam/attempt/${attemptPk}/submit/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                body: JSON.stringify({ answers: answersForBackend })
+            });
+            const result = await response.json();
+            if (result.status === 'success') {
+                window.location.href = result.redirect_url;
+            } else {
+                throw new Error(result.message || 'Gagal mengirim jawaban.');
+            }
+        } catch (error) {
+            showAlert('Error', `Terjadi kesalahan: ${error.message}`, [{ text: 'Tutup', action: hideAlert, class: 'bg-red-500 text-white font-bold py-2 px-6 rounded-lg' }]);
+            elements.finishBtn.disabled = false;
+            elements.finishBtn.textContent = 'Selesaikan Ujian';
+            state.isExamActive = true;
+        }
     }
 
     function startExam() {
-        // ... (logika startExam Anda) ...
-        state.isExamActive = true;
-        renderAll(); // Panggil renderAll untuk memuat jawaban tersimpan ke UI
-        startTimer();
+        enterFullscreen();
         
-        // --- BARU: Mulai menyimpan otomatis setiap 30 detik ---
-        saveInterval = setInterval(saveProgress, 30000); 
-        
-        // --- BARU: Simpan saat pengguna akan meninggalkan halaman ---
-        window.addEventListener('beforeunload', (event) => {
-            if (state.isExamActive) {
-                saveProgress(); // Lakukan penyimpanan terakhir
-            }
-        });
+        // =======================================================
+        // PERBAIKAN DI SINI: Tambahkan jeda singkat
+        // =======================================================
+        setTimeout(() => {
+            elements.gate.classList.add('hidden');
+            elements.examContainer.classList.remove('hidden');
+            state.isExamActive = true;
+            setupAntiCheat();
+            renderAll();
+            startTimer();
+            state.saveInterval = setInterval(saveProgress, 30000);
+            window.addEventListener('beforeunload', () => {
+                if (state.isExamActive) saveProgress();
+            });
+        }, 200); // Jeda 200 milidetik
     }
 
     function navigateQuestion(index) {
         if (index < 0 || index >= questions.length) return;
         state.currentQuestionIndex = index;
         renderAll();
+    }
+
+    function renderAll() {
+        renderQuestion();
+        renderQuestionNav();
+        updateNavButtons();
     }
 
     function renderQuestion() {
@@ -327,38 +319,39 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
 
             case 'MENJODOHKAN':
-                if (question.options && question.options.prompts && question.options.choices) {
-                    let promptsHtml = '';
+                const currentAnswer = answerState.answer && typeof answerState.answer === 'object' ? answerState.answer : {};
+                const answeredChoiceIds = Object.values(currentAnswer).map(String);
+                let promptsHtml = '';
+                let choicesHtml = '';
+
+                if (question.options && Array.isArray(question.options.prompts) && Array.isArray(question.options.choices)) {
                     question.options.prompts.forEach(p => {
-                        promptsHtml += `
-                            <div class="prompt-item">
-                                <div class="font-medium text-gray-700 flex-1">${p.text}</div>
-                                <div class="drop-zone" data-prompt-id="${p.id}"></div>
-                            </div>`;
+                        const choiceIdForThisPrompt = currentAnswer[p.id];
+                        let droppedItemHtml = '';
+                        if (choiceIdForThisPrompt) {
+                            const choice = question.options.choices.find(c => String(c.id) === String(choiceIdForThisPrompt));
+                            if (choice) {
+                                droppedItemHtml = `<div class="choice-item p-3 border rounded-md bg-gray-100 cursor-grab" draggable="true" data-choice-id="${choice.id}">${choice.text}</div>`;
+                            }
+                        }
+                        promptsHtml += `<div class="flex justify-between items-center p-3 border rounded-md mb-2"><span>${p.text}</span><div class="drop-zone" data-prompt-id="${p.id}">${droppedItemHtml}</div></div>`;
                     });
-                    let choicesHtml = '';
-                    const shuffledChoices = [...question.options.choices].sort(() => Math.random() - 0.5);
-                    shuffledChoices.forEach(c => {
-                        choicesHtml += `<div class="choice-item" draggable="true" data-choice-id="${c.id}">${c.text}</div>`;
+
+                    question.options.choices.forEach(c => {
+                        if (!answeredChoiceIds.includes(String(c.id))) {
+                            choicesHtml += `<div class="choice-item p-3 border rounded-md bg-gray-100 cursor-grab" draggable="true" data-choice-id="${c.id}">${c.text}</div>`;
+                        }
                     });
-                    answerFieldHtml = `
-                        <div class="matching-container mt-8">
-                            <div class="matching-prompts">
-                                <h3 class="font-semibold text-center mb-2">Pernyataan</h3>
-                                ${promptsHtml}
-                            </div>
-                            <div class="matching-choices">
-                                <h3 class="font-semibold text-center mb-2">Pilihan Jawaban (Tarik)</h3>
-                                ${choicesHtml}
-                            </div>
-                        </div>`;
-                    setTimeout(() => setupDragAndDrop(question.pk), 0);
-                } else {
-                    answerFieldHtml = `<p class="text-red-500">Opsi untuk soal menjodohkan tidak tersedia.</p>`;
                 }
+                
+                answerFieldHtml = `
+                    <div class="grid grid-cols-2 gap-8 mt-6">
+                        <div><h4 class="font-semibold text-center mb-3">Pernyataan</h4><div class="space-y-2">${promptsHtml}</div></div>
+                        <div><h4 class="font-semibold text-center mb-3">Pilihan (Tarik ke Kiri)</h4><div class="space-y-2" id="matching-choices-container">${choicesHtml}</div></div>
+                    </div>
+                `;
+                setTimeout(() => setupDragAndDrop(question.pk), 0);
                 break;
-            default:
-                answerFieldHtml = `<p class="mt-6 text-red-500">Tipe soal tidak dikenali.</p>`;
         }
 
         elements.questionArea.innerHTML = `
@@ -370,19 +363,23 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
             ${answerFieldHtml}`;
 
-        const inputs = elements.questionArea.querySelectorAll(`input[name^='question_'], textarea[name^='question_'], select[name^='question_']`);
+        const inputs = elements.questionArea.querySelectorAll(`input[name^='question_'], textarea[name^='question_']`);
         inputs.forEach(input => {
             const eventType = (input.type === 'text' || input.tagName.toLowerCase() === 'textarea') ? 'input' : 'change';
             input.addEventListener(eventType, handleAnswerChange);
         });
+
         if (window.MathJax) {
-            MathJax.typesetPromise([elements.questionArea, elements.passageArea]);
+            MathJax.typesetPromise([elements.questionArea]);
         }
     }
+
     function setupDragAndDrop(questionPk) {
         const choices = document.querySelectorAll('.choice-item');
         const dropZones = document.querySelectorAll('.drop-zone');
+        const choicesContainer = document.getElementById('matching-choices-container');
         let draggedItem = null;
+
         choices.forEach(choice => {
             choice.addEventListener('dragstart', () => {
                 draggedItem = choice;
@@ -390,34 +387,52 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             choice.addEventListener('dragend', () => {
                 setTimeout(() => {
-                    draggedItem.style.display = 'block';
-                    draggedItem = null;
+                    if (draggedItem) {
+                        draggedItem.style.display = 'block';
+                        draggedItem = null;
+                    }
                 }, 0);
             });
         });
-        dropZones.forEach(zone => {
-            zone.addEventListener('dragover', e => e.preventDefault());
-            zone.addEventListener('dragenter', e => {
+
+        const allDropTargets = [...dropZones, choicesContainer];
+
+        allDropTargets.forEach(target => {
+            if (!target) return;
+            target.addEventListener('dragover', e => e.preventDefault());
+            target.addEventListener('dragenter', e => {
                 e.preventDefault();
-                zone.classList.add('over');
+                target.classList.add('bg-blue-100');
             });
-            zone.addEventListener('dragleave', () => zone.classList.remove('over'));
-            zone.addEventListener('drop', () => {
-                zone.classList.remove('over');
-                if (zone.children.length === 0) {
-                    zone.appendChild(draggedItem);
-                    draggedItem.classList.add('placed');
-                    handleMatchingAnswerChange();
+            target.addEventListener('dragleave', () => target.classList.remove('bg-blue-100'));
+            target.addEventListener('drop', (e) => {
+                e.preventDefault();
+                target.classList.remove('bg-blue-100');
+                if (draggedItem) {
+                    if (target.classList.contains('drop-zone') && target.children.length > 0) {
+                        choicesContainer.appendChild(target.children[0]);
+                    }
+                    target.appendChild(draggedItem);
                 }
+                handleMatchingAnswerChange();
             });
         });
-        document.querySelector('.matching-choices').addEventListener('click', e => {
-            if (e.target.classList.contains('placed')) {
-                document.querySelector('.matching-choices').appendChild(e.target);
-                e.target.classList.remove('placed');
-                handleMatchingAnswerChange();
+    }
+    
+    function handleMatchingAnswerChange() {
+        const answer = {};
+        document.querySelectorAll('.drop-zone').forEach(zone => {
+            const promptId = zone.dataset.promptId;
+            const choice = zone.querySelector('.choice-item');
+            if (promptId && choice) {
+                answer[promptId] = choice.dataset.choiceId;
             }
         });
+        
+        const currentAnswerState = state.studentAnswers[state.currentQuestionIndex];
+        currentAnswerState.answer = answer;
+        currentAnswerState.isAnswered = Object.keys(answer).length > 0;
+        renderQuestionNav();
     }
 
     function renderQuestionNav() {
@@ -443,32 +458,10 @@ document.addEventListener('DOMContentLoaded', function() {
         elements.markBtn.innerHTML = isMarked ? `Batalkan Ragu-ragu` : `Ragu-ragu`;
     }
 
-    function renderAll() {
-        renderQuestion();
-        renderQuestionNav();
-        updateNavButtons();
-    }
-
     function handleAnswerChange(event) {
         const currentAnswerState = state.studentAnswers[state.currentQuestionIndex];
-        const questionType = questions[state.currentQuestionIndex].type;
-
-        if (questionType === 'MENJODOHKAN') {
-            if (typeof currentAnswerState.answer !== 'object' || currentAnswerState.answer === null) {
-                currentAnswerState.answer = {};
-            }
-            const promptId = event.target.dataset.promptId;
-            const selectedValue = event.target.value;
-            if (selectedValue) {
-                currentAnswerState.answer[promptId] = selectedValue;
-            } else {
-                delete currentAnswerState.answer[promptId];
-            }
-            currentAnswerState.isAnswered = Object.keys(currentAnswerState.answer).length > 0;
-        } else {
-            currentAnswerState.answer = event.target.value;
-            currentAnswerState.isAnswered = !!event.target.value && event.target.value.trim() !== '';
-        }
+        currentAnswerState.answer = event.target.value;
+        currentAnswerState.isAnswered = !!event.target.value && event.target.value.trim() !== '';
         renderQuestionNav();
     }
 
@@ -481,46 +474,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const answeredCount = state.studentAnswers.filter(a => a.isAnswered).length;
         showAlert('Konfirmasi Selesai', `Anda telah menjawab ${answeredCount} dari ${questions.length} soal. Yakin?`, [
             { text: 'Batal', action: hideAlert, class: 'bg-gray-200 text-gray-800 font-bold py-2 px-6 rounded-lg' },
-            { text: 'Ya, Kumpulkan', action: submitExamWithFetch, class: 'bg-green-500 text-white font-bold py-2 px-6 rounded-lg' }
+            { text: 'Ya, Kumpulkan', action: submitExam, class: 'bg-green-500 text-white font-bold py-2 px-6 rounded-lg' }
         ]);
-    }
-
-    async function submitExamWithFetch() {
-        if (!state.isExamActive) return;
-        state.isExamActive = false;
-        clearInterval(state.timerInterval);
-        await saveProgress();
-        removeAntiCheat(); // Panggil fungsi yang sudah diperbaiki
-        hideAlert();
-
-        const answersForBackend = {};
-        state.studentAnswers.forEach(ans => {
-            if (ans.isAnswered || ans.isMarked) {
-                answersForBackend[ans.pk] = { answer: ans.answer, is_marked: ans.isMarked };
-            }
-        });
-
-        elements.finishBtn.disabled = true;
-        elements.finishBtn.textContent = 'Mengirim...';
-
-        try {
-            const response = await fetch(`/exam/${examPk}/submit/`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
-                body: JSON.stringify({ answers: answersForBackend })
-            });
-            const result = await response.json();
-            if (result.status === 'success') {
-                showAlert('Berhasil', result.message, [{ text: 'OK', action: () => window.location.href = result.redirect_url, class: 'bg-blue-600 text-white font-bold py-2 px-6 rounded-lg' }]);
-            } else {
-                throw new Error(result.message || 'Gagal mengirim jawaban.');
-            }
-        } catch (error) {
-            showAlert('Error', `Terjadi kesalahan: ${error.message}`, [{ text: 'Tutup', action: hideAlert, class: 'bg-red-500 text-white font-bold py-2 px-6 rounded-lg' }]);
-            elements.finishBtn.disabled = false;
-            elements.finishBtn.textContent = 'Selesaikan Ujian';
-            state.isExamActive = true;
-        }
     }
 
     function startTimer() {
@@ -530,7 +485,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (state.timeLeft <= 0) {
                 clearInterval(state.timerInterval);
                 showAlert('Waktu Habis!', 'Waktu pengerjaan berakhir.', [
-                    { text: 'OK', action: submitExamWithFetch, class: 'bg-blue-600 text-white font-bold py-2 px-6 rounded-lg' }
+                    { text: 'OK', action: submitExam, class: 'bg-blue-600 text-white font-bold py-2 px-6 rounded-lg' }
                 ]);
             }
         }, 1000);
@@ -568,10 +523,18 @@ document.addEventListener('DOMContentLoaded', function() {
         document.documentElement.requestFullscreen().catch(err => console.error(err));
     }
 
-    // --- PERBAIKAN FUNGSI ANTI-CURANG ---
-
-    // Definisikan fungsi handler dengan nama agar bisa dihapus
-    const onFullscreenChange = () => { if (!document.fullscreenElement) handleViolation(); };
+    const onFullscreenChange = () => {
+        setTimeout(() => {
+            if (!document.fullscreenElement && state.isExamActive) {
+                handleViolation();
+            }
+        }, 100);
+    };
+    const onVisibilityChange = () => {
+        if (document.visibilityState === 'hidden' && state.isExamActive) {
+            handleViolation();
+        }
+    };
     const onBlur = () => { setTimeout(() => { if (!document.hasFocus()) handleViolation(); }, 100); };
     const onContextMenu = e => e.preventDefault();
 
@@ -582,10 +545,8 @@ document.addEventListener('DOMContentLoaded', function() {
         clearInterval(state.timerInterval);
         removeAntiCheat();
         
-        // --- PERUBAHAN 1: Gunakan exam.pk bukan exam.id ---
-        const resumeUrl = "{% url 'resume_exam_with_token' exam_pk=exam.pk %}";
+        const resumeUrl = `{% url 'exam_token_gate' pk=exam.pk %}`;
 
-        // --- PERUBAHAN 2: Tampilkan modal sebelum redirect ---
         showAlert(
             'Pelanggaran Terdeteksi', 
             'Anda telah keluar dari mode layar penuh atau beralih jendela. Ujian telah dijeda. Klik tombol di bawah untuk melanjutkan.', 

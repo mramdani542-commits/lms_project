@@ -1,0 +1,164 @@
+{% extends 'dashboard/layouts/base.html' %}
+{% load static %}
+
+{% block title %}Edit Soal #{{ question.pk }}{% endblock %}
+{% block page_title %}Edit Soal #{{ question.pk }}{% endblock %}
+
+{% block extra_head %}
+<!-- Load Alpine.js -->
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<!-- Load TinyMCE -->
+<!-- PENTING: Ganti 'no-api-key' dengan API Key Anda dari tiny.cloud -->
+<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+{% endblock %}
+
+{% block content %}
+<div class="bg-white p-6 rounded-lg shadow-md" x-data="questionForm()">
+    <form method="POST" enctype="multipart/form-data" @submit.prevent="prepareAndSubmit()">
+        {% csrf_token %}
+        
+        <!-- Teks Pertanyaan -->
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Teks Pertanyaan</label>
+            {{ form.question_text }}
+        </div>
+
+        <!-- Opsi Jawaban (dinamis) -->
+        <div class="mb-6 border p-4 rounded-md" x-show="questionType === 'PILIHAN_GANDA'">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Pilihan Jawaban</label>
+            
+            <template x-for="(option, index) in options" :key="index">
+                <div class="flex items-start space-x-3 mb-3 p-2 border-l-4" :class="correctAnswer === option.id ? 'border-green-500 bg-green-50' : 'border-transparent'">
+                    <input type="radio" name="correct_answer_radio" :value="option.id" x-model="correctAnswer" class="mt-1">
+                    <input type="text" x-model="option.id" class="w-16 px-2 py-1 border rounded-md text-center font-semibold" placeholder="A, B, C..">
+                    <div class="w-full">
+                        <textarea :id="'option-editor-' + index" class="tinymce-editor-option" x-model="option.text"></textarea>
+                    </div>
+                    <button type="button" @click="removeOption(index)" class="text-red-500 hover:bg-red-100 rounded-full p-1">&times;</button>
+                </div>
+            </template>
+            
+            <button type="button" @click="addOption()" class="mt-2 text-sm text-blue-600 hover:underline">+ Tambah Pilihan Jawaban</button>
+        </div>
+
+        <!-- Kunci Jawaban (untuk tipe soal lain) -->
+        <div class="mb-6" x-show="questionType !== 'PILIHAN_GANDA'">
+            <label for="id_correct_answer_text" class="block text-sm font-medium text-gray-700 mb-2">Kunci Jawaban</label>
+            <input type="text" id="id_correct_answer_text" x-model="correctAnswer" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+        </div>
+        
+        <!-- Field Tersembunyi untuk Data JSON -->
+        {{ form.options }}
+        {{ form.correct_answer }}
+        
+        <!-- Field lainnya (Mata Pelajaran, Tipe Soal, dll) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>{{ form.matapelajaran.label_tag }} {{ form.matapelajaran }}</div>
+            <div>{{ form.question_type.label_tag }} <select x-model="questionType" name="{{ form.question_type.name }}" id="{{ form.question_type.id_for_label }}" class="w-full px-3 py-2 border border-gray-300 rounded-md">{% for value, text in form.fields.question_type.choices %}<option :value="'{{ value }}'">{{ text }}</option>{% endfor %}</select></div>
+            <div>{{ form.difficulty.label_tag }} {{ form.difficulty }}</div>
+            <div>{{ form.weight.label_tag }} {{ form.weight }}</div>
+            <div>{{ form.question_image.label_tag }} {{ form.question_image }}</div>
+            <div>{{ form.question_audio.label_tag }} {{ form.question_audio }}</div>
+        </div>
+
+        <div class="flex justify-end">
+            <button type="submit" class="bg-blue-600 text-white py-2 px-6 rounded-md">Simpan Perubahan</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    function questionForm() {
+        return {
+            options: [],
+            correctAnswer: '',
+            questionType: '',
+            init() {
+                this.questionType = '{{ form.instance.question_type }}' || 'PILIHAN_GANDA';
+                
+                try {
+                    const initialOptions = JSON.parse('{{ form.options.value|escapejs|default:"{}" }}');
+                    if (Object.keys(initialOptions).length > 0) {
+                        this.options = Object.entries(initialOptions).map(([id, text]) => ({ id, text }));
+                    } else {
+                        this.options = [ { id: 'A', text: '' }, { id: 'B', text: '' }, { id: 'C', text: '' }, { id: 'D', text: '' } ];
+                    }
+                } catch (e) {
+                    this.options = [ { id: 'A', text: '' }, { id: 'B', text: '' }, { id: 'C', text: '' }, { id: 'D', text: '' } ];
+                }
+                
+                this.correctAnswer = '{{ form.correct_answer.value|escapejs }}';
+
+                this.$nextTick(() => {
+                    this.initializeAllEditors();
+                });
+            },
+            initializeAllEditors() {
+                tinymce.init({
+                    selector: '#id_question_text',
+                    plugins: 'advlist autolink lists link image charmap print preview hr anchor pagebreak table',
+                    toolbar_mode: 'floating',
+                });
+                this.options.forEach((opt, index) => this.initOptionEditor('option-editor-' + index));
+            },
+            addOption() {
+                const newId = String.fromCharCode(65 + this.options.length);
+                this.options.push({ id: newId, text: '' });
+                this.$nextTick(() => {
+                    this.initOptionEditor('option-editor-' + (this.options.length - 1));
+                });
+            },
+            removeOption(index) {
+                tinymce.get('option-editor-' + index)?.remove();
+                this.options.splice(index, 1);
+            },
+            initOptionEditor(id) {
+                tinymce.init({
+                    selector: '#' + id,
+                    height: 150,
+                    menubar: false,
+                    plugins: 'lists link image table',
+                    toolbar: 'bold italic underline | bullist numlist | link image table',
+                    setup: (editor) => {
+                        editor.on('change keyup', () => {
+                            const index = parseInt(id.split('-').pop());
+                            if (this.options[index]) {
+                                this.options[index].text = editor.getContent();
+                            }
+                        });
+                    }
+                });
+            },
+            prepareAndSubmit() {
+                // Update editor utama
+                document.getElementById('id_question_text').value = tinymce.get('id_question_text').getContent();
+                
+                if (this.questionType === 'PILIHAN_GANDA') {
+                    // Update semua editor opsi
+                    this.options.forEach((opt, index) => {
+                        const editor = tinymce.get('option-editor-' + index);
+                        if (editor) {
+                            this.options[index].text = editor.getContent();
+                        }
+                    });
+
+                    const optionsJson = {};
+                    this.options.forEach(opt => {
+                        if (opt.id) {
+                            optionsJson[opt.id] = opt.text;
+                        }
+                    });
+                    document.getElementById('id_options').value = JSON.stringify(optionsJson);
+                } else {
+                    document.getElementById('id_options').value = '{}'; // Kosongkan jika bukan PG
+                }
+                
+                document.getElementById('id_correct_answer').value = this.correctAnswer;
+                
+                // Submit form asli
+                this.$el.submit();
+            }
+        }
+    }
+</script>
+{% endblock %}
